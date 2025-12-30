@@ -41,39 +41,51 @@ export default function TargetsForm({ targets, onChange }: Props) {
       <div className="targets">
         {targets.map((target, idx) => (
           <div key={`${target.kind}-${idx}`} className="target-row">
-            <select
-              value={target.kind}
-              onChange={(e) => update(idx, { kind: e.target.value as TargetConfig["kind"] })}
-            >
-              {kinds.map((k) => (
-                <option key={k.value} value={k.value}>
-                  {k.label}
-                </option>
-              ))}
-            </select>
-            <input
-              type="number"
-              value={target.address}
-              onChange={(e) =>
-                update(idx, { address: Number.parseInt(e.target.value || "0", 10) })
-              }
-              placeholder="Address"
-            />
-            <input
-              type="number"
-              value={target.count}
-              min={1}
-              max={125}
-              onChange={(e) =>
-                update(idx, { count: Number.parseInt(e.target.value || "1", 10) })
-              }
-              placeholder="Count"
-            />
-            <input
-              value={target.label ?? ""}
-              onChange={(e) => update(idx, { label: e.target.value })}
-              placeholder="Label"
-            />
+            <div className="field inline">
+              <label>Type</label>
+              <select
+                value={target.kind}
+                onChange={(e) => update(idx, { kind: e.target.value as TargetConfig["kind"] })}
+              >
+                {kinds.map((k) => (
+                  <option key={k.value} value={k.value}>
+                    {k.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field inline">
+              <label>Address</label>
+              <input
+                type="number"
+                value={target.address}
+                onChange={(e) =>
+                  update(idx, { address: Number.parseInt(e.target.value || "0", 10) })
+                }
+                placeholder="0"
+              />
+            </div>
+            <div className="field inline">
+              <label>Count</label>
+              <input
+                type="number"
+                value={target.count}
+                min={1}
+                max={125}
+                onChange={(e) =>
+                  update(idx, { count: Number.parseInt(e.target.value || "1", 10) })
+                }
+                placeholder="1"
+              />
+            </div>
+            <div className="field inline">
+              <label>Label</label>
+              <input
+                value={target.label ?? ""}
+                onChange={(e) => update(idx, { label: e.target.value })}
+                placeholder="Label"
+              />
+            </div>
             <button className="ghost" onClick={() => remove(idx)} title="Remove row">
               ✕
             </button>

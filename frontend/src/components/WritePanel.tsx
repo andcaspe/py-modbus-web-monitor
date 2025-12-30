@@ -22,26 +22,37 @@ export default function WritePanel({ disabled, onSend }: Props) {
         <span className="chip">Single/multi supported</span>
       </div>
       <div className="target-row">
-        <select
-          value={form.kind}
-          onChange={(e) => setForm({ ...form, kind: e.target.value as WriteOperationInput["kind"] })}
-        >
-          <option value="holding">Holding register</option>
-          <option value="coil">Coil</option>
-        </select>
-        <input
-          type="number"
-          value={form.address}
-          onChange={(e) =>
-            setForm({ ...form, address: Number.parseInt(e.target.value || "0", 10) })
-          }
-          placeholder="Address"
-        />
-        <input
-          value={form.value}
-          onChange={(e) => setForm({ ...form, value: e.target.value })}
-          placeholder="Value (e.g. 1 or 10,11)"
-        />
+        <div className="field inline">
+          <label>Type</label>
+          <select
+            value={form.kind}
+            onChange={(e) =>
+              setForm({ ...form, kind: e.target.value as WriteOperationInput["kind"] })
+            }
+          >
+            <option value="holding">Holding register</option>
+            <option value="coil">Coil</option>
+          </select>
+        </div>
+        <div className="field inline">
+          <label>Address</label>
+          <input
+            type="number"
+            value={form.address}
+            onChange={(e) =>
+              setForm({ ...form, address: Number.parseInt(e.target.value || "0", 10) })
+            }
+            placeholder="0"
+          />
+        </div>
+        <div className="field inline" style={{ flex: "2 1 180px" }}>
+          <label>Value</label>
+          <input
+            value={form.value}
+            onChange={(e) => setForm({ ...form, value: e.target.value })}
+            placeholder="e.g. 1 or 10,11"
+          />
+        </div>
         <button className="primary" onClick={send} disabled={disabled}>
           Send
         </button>
