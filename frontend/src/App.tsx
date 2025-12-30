@@ -51,6 +51,7 @@ export default function App() {
   const [history, setHistory] = useState<Record<string, HistoryPoint[]>>({});
   const [logs, setLogs] = useState<string[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
+  const targetsRef = useRef<TargetConfig[]>(targets);
 
   const wsUrl = useMemo(() => toWebsocketUrl(apiBase), [apiBase]);
 
@@ -64,11 +65,18 @@ export default function App() {
     [],
   );
 
+  useEffect(() => {
+    targetsRef.current = targets;
+  }, [targets]);
+
   const handleMessage = (event: MessageEvent) => {
     try {
       const payload = JSON.parse(event.data);
       if (payload.type === "update") {
-        const values = payload.data as LiveValue[];
+        const targetKeys = new Set(targetsRef.current.map((t) => keyFor(t)));
+        const values = (payload.data as LiveValue[]).filter((v) =>
+          targetKeys.has(keyFor(v)),
+        );
         setLatest(values);
         const timestamp = payload.timestamp ? Date.parse(payload.timestamp) : Date.now();
         setHistory((prev) => {
@@ -95,6 +103,8 @@ export default function App() {
   const connect = () => {
     wsRef.current?.close();
     setStatus("connecting");
+    setLatest([]);
+    setHistory({});
     pushLog(`Connecting to ${wsUrl}`);
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
@@ -128,6 +138,8 @@ export default function App() {
     wsRef.current?.close();
     wsRef.current = null;
     setStatus("disconnected");
+    setLatest([]);
+    setHistory({});
   };
 
   const parseWriteValue = (value: string, kind: "holding" | "coil") => {
@@ -178,28 +190,30 @@ export default function App() {
         <span className="badge">FastAPI + WebSocket + React</span>
       </div>
 
-      <div className="grid">
+      <div className="top-grid">
+        <ConnectionForm
+          status={status}
+          connection={connection}
+          apiBase={apiBase}
+          onApiBaseChange={setApiBase}
+          onChange={setConnection}
+          onConnect={connect}
+          onDisconnect={disconnect}
+        />
         <div className="stack">
-          <ConnectionForm
-            status={status}
-            connection={connection}
-            apiBase={apiBase}
-            onApiBaseChange={setApiBase}
-            onChange={setConnection}
-            onConnect={connect}
-            onDisconnect={disconnect}
-          />
           <TargetsForm targets={targets} onChange={setTargets} />
           <WritePanel disabled={status !== "connected"} onSend={sendWrite} />
-          <div className="panel">
-            <h3>Logs</h3>
-            <div className="logs">{logs.join("\n") || "Waiting for events..."}</div>
-          </div>
         </div>
-        <div className="stack">
-          <LiveTable rows={latest} />
-          <ChartPanel history={history} labels={labelMap} />
-        </div>
+      </div>
+
+      <div className="plots-stack">
+        <LiveTable rows={latest} />
+        <ChartPanel history={history} labels={labelMap} />
+      </div>
+
+      <div className="panel">
+        <h3>Logs</h3>
+        <div className="logs">{logs.join("\n") || "Waiting for events..."}</div>
       </div>
     </div>
   );

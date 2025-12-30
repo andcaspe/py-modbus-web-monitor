@@ -66,6 +66,20 @@ a {
   gap: 16px;
 }
 
+.top-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.plots-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
 .panel {
   background: var(--panel);
   border: 1px solid rgba(255, 255, 255, 0.03);
@@ -263,6 +277,10 @@ button:disabled {
 
 @media (max-width: 960px) {
   .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .top-grid {
     grid-template-columns: 1fr;
   }
 }
