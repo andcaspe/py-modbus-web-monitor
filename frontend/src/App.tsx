@@ -52,6 +52,8 @@ export default function App() {
   const [logs, setLogs] = useState<string[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
   const targetsRef = useRef<TargetConfig[]>(targets);
+  const reconnectTimer = useRef<number | null>(null);
+  const targetsHashRef = useRef<string>(JSON.stringify(targets));
 
   const wsUrl = useMemo(() => toWebsocketUrl(apiBase), [apiBase]);
 
@@ -61,13 +63,36 @@ export default function App() {
   useEffect(
     () => () => {
       wsRef.current?.close();
+      if (reconnectTimer.current) {
+        clearTimeout(reconnectTimer.current);
+      }
     },
     [],
   );
 
   useEffect(() => {
     targetsRef.current = targets;
+    targetsHashRef.current = JSON.stringify(targets.map((t) => [t.kind, t.address, t.count, t.label]));
   }, [targets]);
+
+  useEffect(() => {
+    const hash = JSON.stringify(targets.map((t) => [t.kind, t.address, t.count, t.label]));
+    if (status !== "connected") {
+      targetsHashRef.current = hash;
+      return;
+    }
+    if (hash === targetsHashRef.current) {
+      return;
+    }
+    targetsHashRef.current = hash;
+    if (reconnectTimer.current) {
+      clearTimeout(reconnectTimer.current);
+    }
+    reconnectTimer.current = window.setTimeout(() => {
+      pushLog("Targets changed, reconnecting monitor with new selection...");
+      connect();
+    }, 400);
+  }, [targets, status]);
 
   const handleMessage = (event: MessageEvent) => {
     try {
@@ -101,6 +126,14 @@ export default function App() {
   };
 
   const connect = () => {
+    if (status === "connecting") {
+      pushLog("Already connecting...");
+      return;
+    }
+    if (reconnectTimer.current) {
+      clearTimeout(reconnectTimer.current);
+      reconnectTimer.current = null;
+    }
     wsRef.current?.close();
     setStatus("connecting");
     setLatest([]);
@@ -110,6 +143,7 @@ export default function App() {
     wsRef.current = ws;
 
     ws.onopen = () => {
+      if (wsRef.current !== ws) return;
       setStatus("connected");
       pushLog(
         `Connected. Subscribing to monitor stream at ${connection.host}:${connection.port} (unit ${connection.unitId})...`,
@@ -125,9 +159,16 @@ export default function App() {
       );
     };
 
-    ws.onmessage = handleMessage;
-    ws.onerror = (e) => pushLog(`Websocket error: ${JSON.stringify(e)}`);
+    ws.onmessage = (event) => {
+      if (wsRef.current !== ws) return;
+      handleMessage(event);
+    };
+    ws.onerror = (e) => {
+      if (wsRef.current !== ws) return;
+      pushLog(`Websocket error: ${JSON.stringify(e)}`);
+    };
     ws.onclose = () => {
+      if (wsRef.current !== ws) return;
       setStatus("disconnected");
       pushLog("Connection closed");
       wsRef.current = null;
@@ -140,6 +181,10 @@ export default function App() {
     setStatus("disconnected");
     setLatest([]);
     setHistory({});
+    if (reconnectTimer.current) {
+      clearTimeout(reconnectTimer.current);
+      reconnectTimer.current = null;
+    }
   };
 
   const parseWriteValue = (value: string, kind: "holding" | "coil") => {

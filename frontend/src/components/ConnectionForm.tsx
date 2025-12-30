@@ -25,7 +25,7 @@ export default function ConnectionForm({
   onConnect,
   onDisconnect,
 }: Props) {
-  const canConnect = status !== "connecting";
+  const canConnect = status === "disconnected";
   return (
     <div className="panel stack">
       <div className="header" style={{ marginBottom: 0 }}>
