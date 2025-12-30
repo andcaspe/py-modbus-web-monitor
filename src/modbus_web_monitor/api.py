@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 from pathlib import Path
 from typing import Dict, List
 
@@ -25,13 +24,6 @@ logger = logging.getLogger(__name__)
 
 
 def _resolve_dist_dir() -> Path | None:
-    env_path = os.getenv("MODBUS_WEB_MONITOR_DIST")
-    if env_path:
-        candidate = Path(env_path).expanduser()
-        if candidate.exists():
-            return candidate
-        logger.warning("MODBUS_WEB_MONITOR_DIST not found at %s", candidate)
-
     package_dist = Path(__file__).resolve().parent / "web"
     if (package_dist / "index.html").exists():
         return package_dist

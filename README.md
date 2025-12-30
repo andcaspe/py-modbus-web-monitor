@@ -99,7 +99,6 @@ For coils, values are coerced from booleans/0/1; multiple values are supported w
 - Build wheel/sdist: `python -m build` (requires `build` or use `hatch build`)
 - CLI entrypoint: `modbus-web-monitor` runs `uvicorn modbus_web_monitor.api:app`
 - Bundle the built UI into the Python package: `scripts/sync_web_assets.sh`
-- Packaged UI location can be overridden with `MODBUS_WEB_MONITOR_DIST`.
 To include the UI in a wheel/sdist, run `scripts/sync_web_assets.sh` before `python -m build`.
 
 ### Debian package (bundled deps)
