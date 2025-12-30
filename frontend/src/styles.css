@@ -239,10 +239,22 @@ button:disabled {
 }
 
 .target-row {
-  display: grid;
-  grid-template-columns: 1.2fr 0.7fr 0.7fr 1fr auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+  width: 100%;
+}
+
+.target-row select,
+.target-row input {
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+.target-row button {
+  flex: 0 0 auto;
+  padding-inline: 12px;
 }
 
 .chart-panel {
@@ -252,9 +264,5 @@ button:disabled {
 @media (max-width: 960px) {
   .grid {
     grid-template-columns: 1fr;
-  }
-
-  .target-row {
-    grid-template-columns: repeat(2, 1fr);
   }
 }
