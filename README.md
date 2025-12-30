@@ -34,6 +34,14 @@ uvicorn modbus_web_monitor.api:app --reload
 ```
 The backend will serve `frontend/dist` automatically if it exists.
 
+### Simulated Modbus server (for testing)
+Run a local Modbus TCP device with changing registers/coils:
+```bash
+pip install -e .
+modbus-sim-server --port 1502 --period 0.5  # defaults: host=0.0.0.0, port=1502, period=1s
+```
+Holding/input registers vary over time; coils/discrete inputs flip each tick.
+
 ## WebSocket protocol (`/ws/monitor`)
 - **First message (required)**:
 ```json

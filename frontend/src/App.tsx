@@ -101,7 +101,9 @@ export default function App() {
 
     ws.onopen = () => {
       setStatus("connected");
-      pushLog("Connected. Subscribing to monitor stream...");
+      pushLog(
+        `Connected. Subscribing to monitor stream at ${connection.host}:${connection.port} (unit ${connection.unitId})...`,
+      );
       const { interval, ...connectionBody } = connection;
       ws.send(
         JSON.stringify({

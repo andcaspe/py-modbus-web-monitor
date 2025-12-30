@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 from typing import Dict, List
 
@@ -18,6 +19,8 @@ from .modbus_client import (
 )
 from .monitor import run_monitor_session
 from .schemas import MonitorCommand, MonitorConfig, ReadRequest, WriteRequest
+
+logger = logging.getLogger(__name__)
 
 
 def create_app() -> FastAPI:
@@ -96,6 +99,20 @@ async def websocket_monitor(websocket: WebSocket) -> None:
             connection=command.connection,
             interval=command.interval or 1.0,
             targets=command.targets or [],
+        )
+        logger.info(
+            "WebSocket configure: host=%s port=%s unit=%s targets=%d interval=%.3f",
+            config.connection.host,
+            config.connection.port,
+            config.connection.unit_id,
+            len(config.targets),
+            config.interval,
+        )
+        await websocket.send_json(
+            {
+                "type": "status",
+                "message": f"Config set for {config.connection.host}:{config.connection.port} (unit {config.connection.unit_id})",
+            }
         )
     except Exception as exc:  # noqa: BLE001 - send details to client
         await websocket.send_json({"type": "error", "message": f"Invalid configuration: {exc}"})

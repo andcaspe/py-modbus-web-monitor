@@ -61,28 +61,29 @@ class ModbusTcpSession:
             )
 
     async def close(self) -> None:
-        await self._client.close()
+        # pymodbus async client close() is synchronous; don't await.
+        self._client.close()
 
     async def read(self, target: ReadTarget, unit_id: int | None = None) -> List[int | bool]:
         """Read a register/coil."""
-        unit = unit_id if unit_id is not None else self.settings.unit_id
+        device_id = unit_id if unit_id is not None else self.settings.unit_id
         async with self._lock:
             try:
                 if target.kind == "holding":
                     response = await self._client.read_holding_registers(
-                        target.address, target.count, unit=unit
+                        target.address, count=target.count, device_id=device_id
                     )
                 elif target.kind == "input":
                     response = await self._client.read_input_registers(
-                        target.address, target.count, unit=unit
+                        target.address, count=target.count, device_id=device_id
                     )
                 elif target.kind == "coil":
                     response = await self._client.read_coils(
-                        target.address, target.count, unit=unit
+                        target.address, count=target.count, device_id=device_id
                     )
                 else:
                     response = await self._client.read_discrete_inputs(
-                        target.address, target.count, unit=unit
+                        target.address, count=target.count, device_id=device_id
                     )
             except ModbusException as exc:
                 raise ModbusOperationError(str(exc)) from exc
@@ -91,29 +92,29 @@ class ModbusTcpSession:
 
     async def write(self, operation: WriteOperation, unit_id: int | None = None) -> None:
         """Write a register or coil value."""
-        unit = unit_id if unit_id is not None else self.settings.unit_id
+        device_id = unit_id if unit_id is not None else self.settings.unit_id
         value = operation.value
         async with self._lock:
             try:
                 if operation.kind == "holding":
                     if isinstance(value, list):
                         response = await self._client.write_registers(
-                            operation.address, value, unit=unit
+                            operation.address, value, device_id=device_id
                         )
                     else:
                         response = await self._client.write_register(
-                            operation.address, int(value), unit=unit
+                            operation.address, int(value), device_id=device_id
                         )
                 else:
                     # coil
                     if isinstance(value, list):
                         bool_values = [bool(v) for v in value]
                         response = await self._client.write_coils(
-                            operation.address, bool_values, unit=unit
+                            operation.address, bool_values, device_id=device_id
                         )
                     else:
                         response = await self._client.write_coil(
-                            operation.address, bool(value), unit=unit
+                            operation.address, bool(value), device_id=device_id
                         )
             except ModbusException as exc:
                 raise ModbusOperationError(str(exc)) from exc

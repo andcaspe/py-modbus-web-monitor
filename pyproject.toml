@@ -32,6 +32,7 @@ Source = "https://github.com/your-name/modbus-web-monitor"
 
 [project.scripts]
 modbus-web-monitor = "modbus_web_monitor.main:main"
+modbus-sim-server = "modbus_web_monitor.utils.sim_server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/modbus_web_monitor"]
