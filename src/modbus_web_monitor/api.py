@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Dict, List
 
@@ -21,6 +22,25 @@ from .monitor import run_monitor_session
 from .schemas import MonitorCommand, MonitorConfig, ReadRequest, WriteRequest
 
 logger = logging.getLogger(__name__)
+
+
+def _resolve_dist_dir() -> Path | None:
+    env_path = os.getenv("MODBUS_WEB_MONITOR_DIST")
+    if env_path:
+        candidate = Path(env_path).expanduser()
+        if candidate.exists():
+            return candidate
+        logger.warning("MODBUS_WEB_MONITOR_DIST not found at %s", candidate)
+
+    package_dist = Path(__file__).resolve().parent / "web"
+    if (package_dist / "index.html").exists():
+        return package_dist
+
+    project_root = Path(__file__).resolve().parents[2]
+    dist_dir = project_root / "frontend" / "dist"
+    if dist_dir.exists():
+        return dist_dir
+    return None
 
 
 def create_app() -> FastAPI:
@@ -71,9 +91,8 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    project_root = Path(__file__).resolve().parents[2]
-    dist_dir = project_root / "frontend" / "dist"
-    if dist_dir.exists():
+    dist_dir = _resolve_dist_dir()
+    if dist_dir:
         app.mount("/app", StaticFiles(directory=dist_dir, html=True), name="frontend")
 
     return app

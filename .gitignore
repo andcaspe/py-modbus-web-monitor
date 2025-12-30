@@ -25,6 +25,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+src/modbus_web_monitor/web/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
