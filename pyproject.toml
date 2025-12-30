@@ -36,11 +36,18 @@ modbus-sim-server = "modbus_web_monitor.utils.sim_server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/modbus_web_monitor"]
+include = ["src/modbus_web_monitor/web/**"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/modbus_web_monitor/web" = "modbus_web_monitor/web"
 
 [tool.hatch.build.targets.sdist]
 include = [
-  "src/modbus_web_monitor",
+  "src/modbus_web_monitor/**",
   "README.md",
   "LICENSE",
   "pyproject.toml",
 ]
+
+[tool.hatch.build.targets.sdist.force-include]
+"src/modbus_web_monitor/web" = "src/modbus_web_monitor/web"
