@@ -12,8 +12,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run the Modbus Web Monitor API server.")
     parser.add_argument(
         "--host",
-        default=os.getenv("MODBUS_WEB_MONITOR_HOST", "0.0.0.0"),
-        help="Bind host (default: 0.0.0.0 or MODBUS_WEB_MONITOR_HOST).",
+        default=os.getenv("MODBUS_WEB_MONITOR_HOST", "127.0.0.1"),
+        help="Bind host (default: 127.0.0.1 or MODBUS_WEB_MONITOR_HOST).",
     )
     parser.add_argument(
         "--port",

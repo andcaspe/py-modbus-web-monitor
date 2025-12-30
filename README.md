@@ -38,7 +38,7 @@ The backend will serve `frontend/dist` automatically if it exists.
 Run a local Modbus TCP device with changing registers/coils:
 ```bash
 pip install -e .
-modbus-sim-server --port 1502 --period 0.5  # defaults: host=0.0.0.0, port=1502, period=1s
+modbus-sim-server --port 1502 --period 0.5  # defaults: host=127.0.0.1, port=1502, period=1s
 ```
 Holding/input registers vary over time; coils/discrete inputs flip each tick.
 
@@ -114,7 +114,7 @@ Optional overrides:
 - `BUILD_DIR=build/deb` (output dir)
 
 Runtime overrides:
-- `modbus-web-monitor --host 0.0.0.0 --port 8000`
+- `modbus-web-monitor --host 127.0.0.1 --port 8000`
 - Or set `MODBUS_WEB_MONITOR_HOST` / `MODBUS_WEB_MONITOR_PORT`
 
 ## Roadmap ideas

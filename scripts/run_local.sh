@@ -25,5 +25,5 @@ echo "Building frontend..."
 npm run build
 popd >/dev/null
 
-echo "Starting uvicorn on 0.0.0.0:${PORT}"
-exec uvicorn modbus_web_monitor.api:app --host 0.0.0.0 --port "$PORT"
+echo "Starting uvicorn on 127.0.0.1:${PORT}"
+exec uvicorn modbus_web_monitor.api:app --host 127.0.0.1 --port "$PORT"

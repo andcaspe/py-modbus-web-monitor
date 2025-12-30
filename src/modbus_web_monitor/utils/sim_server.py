@@ -41,7 +41,7 @@ async def _update_values(context: ModbusServerContext, period: float) -> None:
         await asyncio.sleep(period)
 
 
-async def run_simulated_server(host: str = "0.0.0.0", port: int = 1502, period: float = 1.0) -> None:
+async def run_simulated_server(host: str = "127.0.0.1", port: int = 1502, period: float = 1.0) -> None:
     """Start an async Modbus TCP server with in-memory data."""
     device = ModbusDeviceContext(
         di=ModbusSequentialDataBlock(0, [0] * 200),
@@ -64,7 +64,7 @@ async def run_simulated_server(host: str = "0.0.0.0", port: int = 1502, period: 
 
 def parse_args(args: Iterable[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run a simulated Modbus TCP server.")
-    parser.add_argument("--host", default="0.0.0.0", help="Bind host (default: 0.0.0.0)")
+    parser.add_argument("--host", default="127.0.0.1", help="Bind host (default: 127.0.0.1)")
     parser.add_argument("--port", type=int, default=1502, help="Bind port (default: 1502)")
     parser.add_argument(
         "--period",
