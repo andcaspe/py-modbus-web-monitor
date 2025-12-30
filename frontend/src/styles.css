@@ -1,0 +1,260 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap");
+
+:root {
+  --bg: #0b0f1c;
+  --panel: #11182a;
+  --panel-strong: #0f223f;
+  --accent: #5de4c7;
+  --accent-2: #7aa2f7;
+  --text: #e8ecf7;
+  --muted: #94a3b8;
+  --danger: #f87171;
+  --shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Space Grotesk", "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: radial-gradient(120% 120% at 20% 20%, #14213d, #0b0f1c 60%);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+a {
+  color: var(--accent);
+}
+
+.app-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 28px;
+  letter-spacing: 0.4px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.badge {
+  background: rgba(93, 228, 199, 0.1);
+  color: var(--accent);
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 16px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.panel h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  letter-spacing: 0.3px;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.field input,
+.field select {
+  background: #0d1324;
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.button-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+button {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+button.primary {
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  color: #0a0c14;
+}
+
+button.secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+}
+
+button.ghost {
+  background: transparent;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+button.danger {
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--danger);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.dot.ok {
+  background: var(--accent);
+}
+
+.dot.busy {
+  background: var(--accent-2);
+}
+
+.dot.err {
+  background: var(--danger);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 10px 8px;
+  font-size: 14px;
+}
+
+.table th {
+  color: var(--muted);
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.table tbody tr:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(122, 162, 247, 0.1);
+  color: var(--accent-2);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.logs {
+  font-family: "Space Grotesk", monospace;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: pre-wrap;
+  max-height: 160px;
+  overflow: auto;
+  background: #0c1221;
+  border-radius: 10px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.chip {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.targets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.target-row {
+  display: grid;
+  grid-template-columns: 1.2fr 0.7fr 0.7fr 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.chart-panel {
+  min-height: 320px;
+}
+
+@media (max-width: 960px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .target-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
