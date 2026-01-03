@@ -12,7 +12,11 @@ def main():
         str(root_dir / "tests"),
         "-v",
         "--tb=short"
+        f"--alluredir={root_dir / 'outputs' / 'allure-results'}"
     ]
+    # Allow passing extra arguments
+    if len(sys.argv) > 1:
+        args.extend(sys.argv[1:])
     
     return pytest.main(args)
 
