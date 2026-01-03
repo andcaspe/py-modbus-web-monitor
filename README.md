@@ -61,6 +61,34 @@ docker compose --profile sim up --build
 ```
 In the UI, set host to `sim` and port to `1502`.
 
+## Testing & CI/CD
+The project includes a suite of integration tests that verify the REST API and WebSocket functionality using a simulated Modbus server.
+
+### Running Tests Locally
+1.  **Install development dependencies**:
+    ```bash
+    pip install -e ".[dev]"
+    ```
+2.  **Run the test suite**:
+    ```bash
+    python tests/run_all.py
+    ```
+    This will execute all tests and generate Allure results in `outputs/allure-results`.
+
+3.  **View Allure Report (optional)**:
+    If you have the [Allure CLI](https://allurereport.org/docs/install/) installed:
+    ```bash
+    allure serve outputs/allure-results
+    ```
+
+### Continuous Integration
+On every push to `main` or `master`, GitHub Actions automatically:
+- Runs the integration tests across Python 3.10, 3.11, and 3.12.
+- Generates a unified Allure report.
+- Deploys the report to GitHub Pages.
+
+**Live Test Report**: [https://andcaspe.github.io/py-modbus-web-monitor/](https://andcaspe.github.io/py-modbus-web-monitor/)
+
 ## WebSocket protocol (`/ws/monitor`)
 - **First message (required)**:
 ```json
