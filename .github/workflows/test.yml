@@ -84,10 +84,10 @@ jobs:
     - name: Copy latest report to root
       if: always()
       run: |
-        # Ensure write permissions and use -f to force overwrite
-        chmod -R +w allure-history
+        # Use sudo if necessary and force copy to root
         if [ -d "allure-history/${{ github.run_number }}" ]; then
-          cp -rf allure-history/${{ github.run_number }}/* allure-history/
+          sudo cp -rf allure-history/${{ github.run_number }}/* allure-history/
+          sudo chmod -R 777 allure-history
         fi
 
     - name: Deploy report to Github Pages
