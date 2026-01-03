@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+  sim:
+    build: .
+    command: ["modbus-sim-server", "--host", "0.0.0.0", "--port", "1502", "--period", "1.0"]
+    profiles:
+      - sim
+    ports:
+      - "1502:1502"

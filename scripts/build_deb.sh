@@ -58,7 +58,7 @@ Section: web
 Priority: optional
 Architecture: $ARCH
 Depends: python3
-Maintainer: ${DEB_MAINTAINER:-Your Name <you@example.com>}
+Maintainer: ${DEB_MAINTAINER:-Andreu Castillo <cp.andreu97@gmail.com>}
 Description: FastAPI + WebSocket Modbus monitor with a React UI.
  One-command launcher: modbus-web-monitor
 EOF_CONTROL
