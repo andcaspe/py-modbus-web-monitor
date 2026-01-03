@@ -1,0 +1,1 @@
+WARNING  pymodbus.logging:transport.py:250 Failed to connect [Errno 111] Connect call failed ('127.0.0.1', 9999)
