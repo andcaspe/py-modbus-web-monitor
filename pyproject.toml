@@ -24,6 +24,7 @@ dev = [
   "pytest>=7.4",
   "ruff>=0.2",
   "black>=24.3",
+  "allure-pytest>=2.13",
 ]
 
 [project.urls]
@@ -37,9 +38,6 @@ modbus-sim-server = "modbus_web_monitor.utils.sim_server:main"
 [tool.hatch.build.targets.wheel]
 packages = ["src/modbus_web_monitor"]
 include = ["src/modbus_web_monitor/web/**"]
-
-[tool.hatch.build.targets.wheel.force-include]
-"src/modbus_web_monitor/web" = "modbus_web_monitor/web"
 
 [tool.hatch.build.targets.sdist]
 include = [
