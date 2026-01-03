@@ -9,6 +9,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     strategy:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
@@ -38,6 +40,15 @@ jobs:
       with:
         ref: gh-pages
         path: gh-pages
+
+    - name: Prepare Allure history
+      if: always()
+      run: |
+        mkdir -p allure-history
+        if [ -d "gh-pages/history" ]; then
+          cp -r gh-pages/history allure-history/
+        fi
+        rm -rf gh-pages
 
     - name: Generate Allure Report
       uses: simple-elf/allure-report-action@master
