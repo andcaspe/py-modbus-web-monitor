@@ -1,0 +1,7 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","103","test_invalid_connection","tests.integration_tests","Sat Jan 03 16:34:32 UTC 2026","passed","Sat Jan 03 16:34:32 UTC 2026","","test_api","",""
+"","107","test_read_registers","tests.integration_tests","Sat Jan 03 16:34:31 UTC 2026","passed","Sat Jan 03 16:34:31 UTC 2026","","test_api","",""
+"","1108","test_websocket_write_through_monitor","tests.integration_tests","Sat Jan 03 16:34:32 UTC 2026","passed","Sat Jan 03 16:34:33 UTC 2026","","test_websocket","",""
+"","312","test_write_registers","tests.integration_tests","Sat Jan 03 16:34:31 UTC 2026","passed","Sat Jan 03 16:34:32 UTC 2026","","test_api","",""
+"","106","test_websocket_monitor","tests.integration_tests","Sat Jan 03 16:34:32 UTC 2026","passed","Sat Jan 03 16:34:32 UTC 2026","","test_websocket","",""
+"","3","test_websocket_invalid_first_message","tests.integration_tests","Sat Jan 03 16:34:33 UTC 2026","passed","Sat Jan 03 16:34:33 UTC 2026","","test_websocket","",""
