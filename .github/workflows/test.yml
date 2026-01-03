@@ -75,10 +75,16 @@ jobs:
     - name: Generate Allure Report
       uses: simple-elf/allure-report-action@master
       if: always()
+      id: allure-report
       with:
         allure_results: all-results
         allure_history: allure-history
         keep_reports: 20
+
+    - name: Copy latest report to root
+      if: always()
+      run: |
+        cp -r allure-history/${{ github.run_number }}/* allure-history/
 
     - name: Deploy report to Github Pages
       if: always()
