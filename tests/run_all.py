@@ -11,8 +11,9 @@ def main():
     args = [
         str(root_dir / "tests"),
         "-v",
-        "--tb=short"
-        f"--alluredir={root_dir / 'outputs' / 'allure-results'}"
+        "--tb=short",
+        f"--alluredir={root_dir / 'outputs' / 'allure-results'}",
+        "--clean-alluredir",
     ]
     # Allow passing extra arguments
     if len(sys.argv) > 1:
