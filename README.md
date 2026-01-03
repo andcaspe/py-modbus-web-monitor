@@ -48,6 +48,19 @@ Holding/input registers vary over time; coils/discrete inputs flip each tick.
 ```
 The script creates a venv, installs the backend, builds the frontend, and runs uvicorn serving the built UI.
 
+### Docker (one command)
+Build and run the web app:
+```bash
+docker compose up --build
+```
+Open `http://localhost:8000/app`.
+
+Optional simulated Modbus device (profile-based):
+```bash
+docker compose --profile sim up --build
+```
+In the UI, set host to `sim` and port to `1502`.
+
 ## WebSocket protocol (`/ws/monitor`)
 - **First message (required)**:
 ```json

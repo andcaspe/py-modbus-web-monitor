@@ -9,7 +9,7 @@ description = "FastAPI + WebSocket Modbus monitor with a React UI"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
-authors = [{ name = "Your Name", email = "you@example.com" }]
+authors = [{ name = "Andreu Castillo", email = "cp.andreu97@gmail.com" }]
 dependencies = [
   "fastapi>=0.110",
   "uvicorn[standard]>=0.23",
@@ -27,8 +27,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/your-name/modbus-web-monitor"
-Source = "https://github.com/your-name/modbus-web-monitor"
+Homepage = "https://github.com/andcaspe/modbus-web-monitor"
+Source = "https://github.com/andcaspe/modbus-web-monitor"
 
 [project.scripts]
 modbus-web-monitor = "modbus_web_monitor.main:main"
