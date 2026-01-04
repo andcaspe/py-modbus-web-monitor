@@ -8,16 +8,17 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { HistoryPoint } from "../types";
+import { AnomalyPoint, HistoryPoint } from "../types";
 
 interface Props {
   history: Record<string, HistoryPoint[]>;
   labels: Record<string, string>;
+  anomalies: Record<string, AnomalyPoint[]>;
 }
 
 const palette = ["#5de4c7", "#7aa2f7", "#f59e0b", "#f43f5e", "#34d399", "#c084fc"];
 
-export default function ChartPanel({ history, labels }: Props) {
+export default function ChartPanel({ history, labels, anomalies }: Props) {
   const keys = Object.keys(history);
   const merged: Record<number, Record<string, number | undefined>> = {};
 
@@ -25,6 +26,13 @@ export default function ChartPanel({ history, labels }: Props) {
     history[key]?.forEach((point) => {
       merged[point.timestamp] ??= { timestamp: point.timestamp };
       merged[point.timestamp][key] = point.value;
+    });
+  });
+
+  Object.entries(anomalies).forEach(([key, points]) => {
+    points.forEach((point) => {
+      merged[point.timestamp] ??= { timestamp: point.timestamp };
+      merged[point.timestamp][`${key}__anomaly`] = point.value;
     });
   });
 
@@ -40,6 +48,25 @@ export default function ChartPanel({ history, labels }: Props) {
       </div>
     );
   }
+
+  const renderAnomalyDot =
+    (key: string) =>
+    (props: { cx?: number; cy?: number; payload?: Record<string, number | undefined> }) => {
+      const { cx, cy, payload } = props;
+      if (!payload) return null;
+      if (payload[`${key}__anomaly`] === undefined) return null;
+      if (cx === undefined || cy === undefined) return null;
+      return (
+        <circle
+          cx={cx}
+          cy={cy}
+          r={5}
+          fill="var(--danger)"
+          stroke="rgba(15, 23, 42, 0.9)"
+          strokeWidth={1.5}
+        />
+      );
+    };
 
   return (
     <div className="panel chart-panel">
@@ -69,7 +96,7 @@ export default function ChartPanel({ history, labels }: Props) {
               name={labels[key] || key}
               stroke={palette[idx % palette.length]}
               strokeWidth={2}
-              dot={false}
+              dot={renderAnomalyDot(key)}
               isAnimationActive={false}
             />
           ))}

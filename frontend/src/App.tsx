@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import AnomalyControls from "./components/AnomalyControls";
 import ChartPanel from "./components/ChartPanel";
 import ConnectionForm from "./components/ConnectionForm";
 import LiveTable from "./components/LiveTable";
 import TargetsForm from "./components/TargetsForm";
 import WritePanel from "./components/WritePanel";
 import {
+  AnomalyPoint,
+  AnomalySeries,
+  AnomalySummary,
   ConnectionConfig,
   HistoryPoint,
   LiveValue,
@@ -33,7 +37,6 @@ const toWebsocketUrl = (apiBase: string) => {
 };
 
 const keyFor = (target: { kind: string; address: number }) => `${target.kind}:${target.address}`;
-
 export default function App() {
   const [apiBase, setApiBase] = useState(envApiBase || defaultApiBase);
   const [connection, setConnection] = useState<ConnectionConfig>({
@@ -49,9 +52,20 @@ export default function App() {
   const [status, setStatus] = useState<MonitorStatus>("disconnected");
   const [latest, setLatest] = useState<LiveValue[]>([]);
   const [history, setHistory] = useState<Record<string, HistoryPoint[]>>({});
+  const [anomalySummary, setAnomalySummary] = useState<Record<string, AnomalySummary>>({});
+  const [anomalyHistory, setAnomalyHistory] = useState<Record<string, AnomalyPoint[]>>({});
+  const [anomalyConfig, setAnomalyConfig] = useState({
+    method: "none" as "none" | "zscore" | "stl",
+    window: 60,
+    minSamples: 10,
+    threshold: 3,
+  });
   const [logs, setLogs] = useState<string[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
   const targetsRef = useRef<TargetConfig[]>(targets);
+  const historyRef = useRef<Record<string, HistoryPoint[]>>(history);
+  const lastAnomalyFetchRef = useRef<number>(0);
+  const anomalyRequestRef = useRef<number>(0);
   const reconnectTimer = useRef<number | null>(null);
   const targetsHashRef = useRef<string>(JSON.stringify(targets));
 
@@ -71,9 +85,19 @@ export default function App() {
   );
 
   useEffect(() => {
+    if (status !== "connected") {
+      anomalyRequestRef.current += 1;
+    }
+  }, [status]);
+
+  useEffect(() => {
     targetsRef.current = targets;
     targetsHashRef.current = JSON.stringify(targets.map((t) => [t.kind, t.address, t.count, t.label]));
   }, [targets]);
+
+  useEffect(() => {
+    historyRef.current = history;
+  }, [history]);
 
   useEffect(() => {
     const hash = JSON.stringify(targets.map((t) => [t.kind, t.address, t.count, t.label]));
@@ -93,6 +117,129 @@ export default function App() {
       connect();
     }, 400);
   }, [targets, status]);
+
+  useEffect(() => {
+    if (status !== "connected") {
+      return;
+    }
+    if (latest.length === 0) {
+      return;
+    }
+    if (targets.length === 0) {
+      return;
+    }
+    if (anomalyConfig.method === "none") {
+      return;
+    }
+    const now = Date.now();
+    const minInterval = Math.max(1000, connection.interval * 1000);
+    if (now - lastAnomalyFetchRef.current < minInterval) {
+      return;
+    }
+    lastAnomalyFetchRef.current = now;
+    const requestId = (anomalyRequestRef.current += 1);
+    const { interval: _interval, ...connectionBody } = connection;
+    const endpoint = anomalyConfig.method === "stl" ? "stl" : "zscore";
+    fetch(`${apiBase}/api/anomaly/${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        connection: connectionBody,
+        targets,
+        window: anomalyConfig.window,
+        min_samples: anomalyConfig.minSamples,
+      }),
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Anomaly request failed (${response.status})`);
+        }
+        const payload = (await response.json()) as { data: AnomalySeries[] };
+        if (requestId !== anomalyRequestRef.current) {
+          return;
+        }
+        const summary: Record<string, AnomalySummary> = {};
+        const timestamp = Date.now();
+        payload.data.forEach((series) => {
+          const key = keyFor(series);
+          summary[key] = {
+            value: series.values?.[0] ?? null,
+            zScore: series.z_scores?.[0] ?? null,
+            sampleCount: series.sample_counts?.[0] ?? 0,
+            mean: series.mean?.[0] ?? null,
+            stdev: series.stdev?.[0] ?? null,
+            timestamp,
+          };
+        });
+        setAnomalySummary(summary);
+        setAnomalyHistory((prev) => {
+          const next: Record<string, AnomalyPoint[]> = { ...prev };
+          Object.entries(summary).forEach(([key, entry]) => {
+            if (entry.zScore === null || entry.value === null) {
+              return;
+            }
+            if (Math.abs(entry.zScore) < anomalyConfig.threshold) {
+              return;
+            }
+            const historyPoints = historyRef.current[key] ?? [];
+            const lastTimestamp =
+              historyPoints.length > 0
+                ? historyPoints[historyPoints.length - 1].timestamp
+                : entry.timestamp;
+            const point: AnomalyPoint = {
+              timestamp: lastTimestamp,
+              value: entry.value,
+              zScore: entry.zScore,
+            };
+            const updated = [...(next[key] ?? []), point];
+            next[key] = updated.slice(-200);
+          });
+          return next;
+        });
+      })
+      .catch((err) => {
+        pushLog(`Anomaly fetch error: ${err}`);
+      });
+  }, [apiBase, anomalyConfig, connection, latest, status, targets]);
+
+  useEffect(() => {
+    if (anomalyConfig.method !== "none") {
+      return;
+    }
+    setAnomalySummary({});
+    setAnomalyHistory({});
+  }, [anomalyConfig.method]);
+
+  const handleWindowChange = (value: number) => {
+    setAnomalyConfig((prev) => {
+      const window = Number.isFinite(value) ? Math.max(3, value) : prev.window;
+      const minSamples = Math.min(prev.minSamples, window);
+      return { ...prev, window, minSamples };
+    });
+  };
+
+  const handleMinSamplesChange = (value: number) => {
+    setAnomalyConfig((prev) => {
+      const minSamples = Number.isFinite(value) ? Math.max(3, value) : prev.minSamples;
+      const window = Math.max(prev.window, minSamples);
+      return { ...prev, minSamples, window };
+    });
+  };
+
+  const handleThresholdChange = (value: number) => {
+    setAnomalyConfig((prev) => ({
+      ...prev,
+      threshold: Number.isFinite(value) ? Math.max(0, value) : prev.threshold,
+    }));
+  };
+
+  const handleMethodChange = (value: "none" | "zscore" | "stl") => {
+    setAnomalyConfig((prev) => ({
+      ...prev,
+      method: value,
+    }));
+    anomalyRequestRef.current += 1;
+  };
 
   const handleMessage = (event: MessageEvent) => {
     try {
@@ -138,6 +285,8 @@ export default function App() {
     setStatus("connecting");
     setLatest([]);
     setHistory({});
+    setAnomalySummary({});
+    setAnomalyHistory({});
     pushLog(`Connecting to ${wsUrl}`);
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
@@ -181,6 +330,8 @@ export default function App() {
     setStatus("disconnected");
     setLatest([]);
     setHistory({});
+    setAnomalySummary({});
+    setAnomalyHistory({});
     if (reconnectTimer.current) {
       clearTimeout(reconnectTimer.current);
       reconnectTimer.current = null;
@@ -247,13 +398,29 @@ export default function App() {
         />
         <div className="stack">
           <TargetsForm targets={targets} onChange={setTargets} />
+          <AnomalyControls
+            method={anomalyConfig.method}
+            window={anomalyConfig.window}
+            minSamples={anomalyConfig.minSamples}
+            threshold={anomalyConfig.threshold}
+            onMethodChange={handleMethodChange}
+            onWindowChange={handleWindowChange}
+            onMinSamplesChange={handleMinSamplesChange}
+            onThresholdChange={handleThresholdChange}
+          />
           <WritePanel disabled={status !== "connected"} onSend={sendWrite} />
         </div>
       </div>
 
       <div className="plots-stack">
-        <LiveTable rows={latest} />
-        <ChartPanel history={history} labels={labelMap} />
+        <LiveTable
+          rows={latest}
+          anomalies={anomalySummary}
+          threshold={anomalyConfig.threshold}
+          minSamples={anomalyConfig.minSamples}
+          enabled={anomalyConfig.method !== "none"}
+        />
+        <ChartPanel history={history} labels={labelMap} anomalies={anomalyHistory} />
       </div>
 
       <div className="panel">
