@@ -9,6 +9,7 @@ from typing import Any, Dict, List
 
 from fastapi import WebSocket
 
+from .data_logger import get_data_logger
 from .modbus_client import (
     ModbusConnectionError,
     ModbusOperationError,
@@ -31,6 +32,7 @@ async def _poll_registers(
             "message": f"Monitoring {len(config.targets)} target(s) every {config.interval}s",
         }
     )
+    data_logger = get_data_logger()
     while not stop_event.is_set():
         payload: List[Dict[str, Any]] = []
         try:
@@ -47,10 +49,17 @@ async def _poll_registers(
         except ModbusOperationError as exc:
             await websocket.send_json({"type": "error", "message": str(exc)})
         else:
+            timestamp = datetime.now(timezone.utc).isoformat()
+            await data_logger.log_readings(
+                config.connection,
+                payload,
+                source="monitor",
+                timestamp=timestamp,
+            )
             await websocket.send_json(
                 {
                     "type": "update",
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": timestamp,
                     "data": payload,
                 }
             )
