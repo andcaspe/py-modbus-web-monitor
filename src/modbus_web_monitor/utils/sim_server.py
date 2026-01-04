@@ -109,8 +109,8 @@ _PROFILES = {
 
 @dataclass(frozen=True)
 class SignalSettings:
-    holding_signal: str = "ramp"
-    input_signal: str = "sine"
+    holding_signal: str = "sine"
+    input_signal: str = "ramp"
     amplitude: float = 500.0
     offset: float = 500.0
     noise: float = 10.0
@@ -520,6 +520,12 @@ def parse_args(args: Iterable[str] | None = None) -> argparse.Namespace:
         help="Phase increment per tick (default: 0.2)",
     )
     parser.add_argument(
+        "--cycle-seconds",
+        type=float,
+        default=argparse.SUPPRESS,
+        help="Seconds per full sine cycle (derives phase-step from --period)",
+    )
+    parser.add_argument(
         "--phase-shift",
         type=float,
         default=argparse.SUPPRESS,
@@ -596,6 +602,12 @@ def main(argv: Iterable[str] | None = None) -> None:
         signal_settings = replace(signal_settings, phase_step=options.phase_step)
     if hasattr(options, "phase_shift"):
         signal_settings = replace(signal_settings, phase_shift=options.phase_shift)
+    if hasattr(options, "cycle_seconds") and not hasattr(options, "phase_step"):
+        cycle_seconds = max(0.1, options.cycle_seconds)
+        period_seconds = max(0.01, options.period)
+        signal_settings = replace(
+            signal_settings, phase_step=(math.tau * period_seconds) / cycle_seconds
+        )
     signal_settings = replace(signal_settings, count=count)
 
     fault_overrides_used = False

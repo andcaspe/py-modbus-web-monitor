@@ -56,6 +56,11 @@ modbus-sim-server \
   --fault-magnitude 400
 ```
 
+Set a target cycle length for sine waves (e.g., 2 seconds per full cycle):
+```bash
+modbus-sim-server --input-signal sine --holding-signal sine --period 0.1 --cycle-seconds 2
+```
+
 Or use a preset fault profile:
 ```bash
 modbus-sim-server --fault-profile sine_drop
