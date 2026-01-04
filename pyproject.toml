@@ -26,6 +26,9 @@ dev = [
   "black>=24.3",
   "allure-pytest>=2.13",
 ]
+ml = [
+  "statsmodels>=0.14",
+]
 
 [project.urls]
 Homepage = "https://github.com/andcaspe/modbus-web-monitor"
