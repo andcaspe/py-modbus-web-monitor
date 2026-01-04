@@ -42,6 +42,45 @@ modbus-sim-server --port 1502 --period 0.5  # defaults: host=127.0.0.1, port=150
 ```
 Holding/input registers vary over time; coils/discrete inputs flip each tick.
 
+Optional fault injection + sine wave signals:
+```bash
+modbus-sim-server \
+  --holding-signal sine \
+  --input-signal sine \
+  --fault-enable \
+  --fault-mode drop \
+  --fault-kind input \
+  --fault-addresses 0 \
+  --fault-every 20 \
+  --fault-duration 5 \
+  --fault-magnitude 400
+```
+
+Or use a preset fault profile:
+```bash
+modbus-sim-server --fault-profile sine_drop
+```
+Available profiles: `sine_drop`, `sensor_drift`, `compressor`.
+Each profile also ships default outlier settings you can enable with `--outlier-enable`.
+
+Example: profile + outliers enabled:
+```bash
+modbus-sim-server --fault-profile sine_drop --outlier-enable
+```
+
+Point-wise outliers (single-tick spikes/drops):
+```bash
+modbus-sim-server \
+  --holding-signal sine \
+  --input-signal sine \
+  --outlier-enable \
+  --outlier-kind input \
+  --outlier-addresses 0-3 \
+  --outlier-probability 0.1 \
+  --outlier-mode random \
+  --outlier-magnitude 350
+```
+
 ### One-command setup/run (dev)
 ```bash
 ./scripts/run_local.sh   # PORT=8000 VENV=.venv override as needed
@@ -134,6 +173,31 @@ For coils, values are coerced from booleans/0/1; multiple values are supported w
     "writes": [{"kind": "holding", "address": 15, "value": [1, 2, 3]}]
   }
   ```
+
+- `POST /api/anomaly/zscore`  
+  Computes z-scores from logged readings (no live Modbus read).  
+  ```json
+  {
+    "connection": {"protocol": "tcp", "host": "127.0.0.1", "port": 502, "unitId": 1},
+    "targets": [{"kind": "holding", "address": 0, "count": 1}],
+    "window": 60,
+    "min_samples": 10
+  }
+  ```
+  Returns the latest value, z-score, and sample counts per target value.
+
+- `POST /api/anomaly/stl`  
+  Uses STL decomposition to compute z-scores from residuals.  
+  Requires `statsmodels` (`pip install -e ".[ml]"`).  
+  Same payload as `/api/anomaly/zscore`.
+
+## Data logging (SQLite)
+By default, holding/input readings are logged to `outputs/modbus_readings.sqlite`.
+
+Environment overrides:
+- `MODBUS_WEB_MONITOR_DB=/path/to/modbus_readings.sqlite`
+- `MODBUS_WEB_MONITOR_LOG_ENABLED=false` to disable logging
+- `MODBUS_WEB_MONITOR_LOG_KINDS=holding,input` (or `all`)
 
 ## Packaging
 - Install/editable: `pip install -e .`
