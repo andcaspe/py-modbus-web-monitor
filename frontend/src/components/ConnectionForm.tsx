@@ -79,7 +79,8 @@ export default function ConnectionForm({
           <label>Poll interval (s)</label>
           <input
             type="number"
-            step="0.1"
+            min="0.005"
+            step="0.001"
             value={connection.interval}
             onChange={(e) =>
               onChange({

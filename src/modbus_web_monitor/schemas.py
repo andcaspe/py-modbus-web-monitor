@@ -72,7 +72,7 @@ class MonitorConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     connection: ConnectionSettings
-    interval: float = Field(1.0, gt=0.05, le=60.0)
+    interval: float = Field(1.0, ge=0.005, le=60.0)
     targets: List[ReadTarget]
 
 
