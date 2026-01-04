@@ -97,3 +97,20 @@ class MonitorCommand(BaseModel):
         if self.type == "write" and not self.writes:
             raise ValueError("write command requires 'writes'")
         return self
+
+
+class AnomalyRequest(BaseModel):
+    """HTTP payload to compute simple z-score anomalies from logged data."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    connection: ConnectionSettings
+    targets: List[ReadTarget]
+    window: int = Field(60, ge=3, le=10000)
+    min_samples: int = Field(10, ge=3, le=10000)
+
+    @model_validator(mode="after")
+    def validate_window(self) -> "AnomalyRequest":
+        if self.min_samples > self.window:
+            raise ValueError("min_samples must be <= window")
+        return self
