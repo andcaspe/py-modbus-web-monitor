@@ -24,6 +24,7 @@ dev = [
   "pytest>=7.4",
   "ruff>=0.2",
   "black>=24.3",
+  "pre-commit>=3.7",
   "allure-pytest>=2.13",
 ]
 notebooks = [
