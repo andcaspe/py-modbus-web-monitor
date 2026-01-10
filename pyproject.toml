@@ -25,6 +25,7 @@ dev = [
   "ruff>=0.2",
   "black>=24.3",
   "isort>=5.13",
+  "mypy>=1.10",
   "pre-commit>=3.7",
   "allure-pytest>=2.13",
 ]
@@ -45,6 +46,15 @@ Source = "https://github.com/andcaspe/modbus-web-monitor"
 [project.scripts]
 modbus-web-monitor = "modbus_web_monitor.main:main"
 modbus-sim-server = "modbus_web_monitor.utils.sim_server:main"
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src/modbus_web_monitor"]
+ignore_missing_imports = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_ignores = true
+no_implicit_optional = true
 
 [tool.isort]
 profile = "black"
