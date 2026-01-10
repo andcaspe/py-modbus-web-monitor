@@ -278,6 +278,7 @@ async def websocket_monitor(websocket: WebSocket) -> None:
             )
             await websocket.close()
             return
+        assert command.connection is not None
         config = MonitorConfig(
             connection=command.connection,
             interval=command.interval or 1.0,

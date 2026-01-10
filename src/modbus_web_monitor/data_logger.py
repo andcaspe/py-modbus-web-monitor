@@ -155,8 +155,6 @@ class SQLiteDataLogger:
             return []
 
     def _ensure_initialized(self) -> None:
-        if self._initialized:
-            return
         with self._init_lock:
             if self._initialized:
                 return

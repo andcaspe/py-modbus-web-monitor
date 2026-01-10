@@ -9,7 +9,7 @@ import random
 import time
 from contextlib import suppress
 from dataclasses import dataclass, field, replace
-from typing import Iterable
+from typing import Any, Iterable, Sequence
 
 from pymodbus.datastore import (
     ModbusDeviceContext,
@@ -22,7 +22,7 @@ _SIGNAL_MODES = {"ramp", "sine", "constant"}
 _FAULT_MODES = {"drop", "spike", "drift", "stuck", "random"}
 _FAULT_KINDS = {"holding", "input", "all"}
 _OUTLIER_MODES = {"drop", "spike", "random"}
-_PROFILES = {
+_PROFILES: dict[str, dict[str, dict[str, Any]]] = {
     "sine_drop": {
         "signal": {
             "holding_signal": "sine",
@@ -203,9 +203,9 @@ def _apply_profile(
     profile = _PROFILES.get(profile_name)
     if not profile:
         return signal_settings, fault_settings, outlier_settings
-    signal_overrides = profile.get("signal", {})
-    fault_overrides = profile.get("fault", {})
-    outlier_overrides = profile.get("outlier", {})
+    signal_overrides: dict[str, Any] = dict(profile.get("signal", {}))
+    fault_overrides: dict[str, Any] = dict(profile.get("fault", {}))
+    outlier_overrides: dict[str, Any] = dict(profile.get("outlier", {}))
     if "addresses" in fault_overrides:
         fault_overrides = dict(fault_overrides)
         fault_overrides["addresses"] = _normalize_addresses(
@@ -436,7 +436,7 @@ async def run_simulated_server(
             await updater
 
 
-def parse_args(args: Iterable[str] | None = None) -> argparse.Namespace:
+def parse_args(args: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run a simulated Modbus TCP server.")
     parser.add_argument(
         "--host", default="127.0.0.1", help="Bind host (default: 127.0.0.1)"
@@ -589,7 +589,7 @@ def parse_args(args: Iterable[str] | None = None) -> argparse.Namespace:
     return parser.parse_args(args)
 
 
-def main(argv: Iterable[str] | None = None) -> None:
+def main(argv: Sequence[str] | None = None) -> None:
     options = parse_args(argv)
     count = max(1, min(200, options.register_count))
     signal_settings = SignalSettings(count=count)
