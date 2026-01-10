@@ -1,4 +1,4 @@
-name: Python Tests
+name: CI Tests
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: Python Tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -40,6 +41,7 @@ jobs:
         retention-days: 1
 
   frontend-test:
+    name: Frontend Tests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
