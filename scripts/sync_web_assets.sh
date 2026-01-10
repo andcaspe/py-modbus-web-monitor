@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FRONTEND="$ROOT/frontend"
-PACKAGE_WEB="$ROOT/src/modbus_web_monitor/web"
+PACKAGE_WEB="$ROOT/src/py_modbus_web_monitor/web"
 
 if ! command -v npm >/dev/null; then
   echo "npm not found. Install nodejs + npm." >&2

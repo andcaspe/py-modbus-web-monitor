@@ -19,6 +19,19 @@ const defaultApiBase =
   (typeof window !== "undefined" && `${window.location.protocol}//${window.location.hostname}:8000`) ||
   "http://localhost:8000";
 const envApiBase = import.meta.env.VITE_API_BASE as string | undefined;
+const envDefaultHost = import.meta.env.VITE_DEFAULT_MODBUS_HOST as string | undefined;
+const envDefaultPort = import.meta.env.VITE_DEFAULT_MODBUS_PORT as string | undefined;
+
+const parsePort = (value: string | undefined, fallback: number) => {
+  if (!value) {
+    return fallback;
+  }
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const defaultHost = envDefaultHost || "127.0.0.1";
+const defaultPort = parsePort(envDefaultPort, 502);
 
 const toWebsocketUrl = (apiBase: string) => {
   try {
@@ -39,8 +52,8 @@ export default function App() {
   const [apiBase, setApiBase] = useState(envApiBase || defaultApiBase);
   const [connection, setConnection] = useState<ConnectionConfig>({
     protocol: "tcp",
-    host: "127.0.0.1",
-    port: 502,
+    host: defaultHost,
+    port: defaultPort,
     unitId: 1,
     interval: 1,
   });

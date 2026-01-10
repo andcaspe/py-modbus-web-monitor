@@ -15,7 +15,7 @@ FastAPI + WebSocket backend with a React UI for reading and writing Modbus devic
 python -m venv .venv
 source .venv/bin/activate
 pip install -e .
-uvicorn modbus_web_monitor.api:app --reload  # http://localhost:8000
+uvicorn py_modbus_web_monitor.api:app --reload  # http://localhost:8000
 ```
 
 ### Frontend (React + Vite)
@@ -30,7 +30,7 @@ To build the UI and let FastAPI serve it from `/app`:
 cd frontend
 npm run build
 cd ..
-uvicorn modbus_web_monitor.api:app --reload
+uvicorn py_modbus_web_monitor.api:app --reload
 ```
 The backend will serve `frontend/dist` automatically if it exists.
 
@@ -221,7 +221,7 @@ Install via extras:
 ## Packaging
 - Install/editable: `pip install -e .`
 - Build wheel/sdist: `python -m build` (requires `build` or use `hatch build`)
-- CLI entrypoint: `modbus-web-monitor` runs `uvicorn modbus_web_monitor.api:app`
+- CLI entrypoint: `py-modbus-web-monitor` runs `uvicorn py_modbus_web_monitor.api:app`
 - Bundle the built UI into the Python package: `scripts/sync_web_assets.sh`
 To include the UI in a wheel/sdist, run `scripts/sync_web_assets.sh` before `python -m build`.
 
@@ -229,8 +229,8 @@ To include the UI in a wheel/sdist, run `scripts/sync_web_assets.sh` before `pyt
 Build a `.deb` that includes a venv + the compiled frontend UI:
 ```bash
 scripts/build_deb.sh
-sudo dpkg -i build/deb/modbus-web-monitor_0.1.0_amd64.deb
-modbus-web-monitor
+sudo dpkg -i build/deb/py-modbus-web-monitor_0.1.0_amd64.deb
+py-modbus-web-monitor
 ```
 Optional overrides:
 - `DEB_MAINTAINER="Name <email>"` (control file)
@@ -238,7 +238,7 @@ Optional overrides:
 - `BUILD_DIR=build/deb` (output dir)
 
 Runtime overrides:
-- `modbus-web-monitor --host 127.0.0.1 --port 8000`
+- `py-modbus-web-monitor --host 127.0.0.1 --port 8000`
 - Or set `MODBUS_WEB_MONITOR_HOST` / `MODBUS_WEB_MONITOR_PORT`
 
 ## Roadmap ideas

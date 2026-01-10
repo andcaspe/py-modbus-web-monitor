@@ -161,7 +161,7 @@ def create_app() -> FastAPI:
         if STL is None:
             raise HTTPException(
                 status_code=503,
-                detail="STL requires statsmodels. Install modbus-web-monitor[ml].",
+                detail="STL requires statsmodels. Install py-modbus-web-monitor[ml].",
             )
         data_logger = get_data_logger()
         results: List[dict] = []

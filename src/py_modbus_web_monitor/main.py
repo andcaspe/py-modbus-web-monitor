@@ -26,7 +26,7 @@ def main() -> None:
     args = parser.parse_args()
 
     uvicorn.run(
-        "modbus_web_monitor.api:app",
+        "py_modbus_web_monitor.api:app",
         host=args.host,
         port=args.port,
         reload=False,

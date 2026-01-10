@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PKG_NAME="modbus-web-monitor"
+PKG_NAME="py-modbus-web-monitor"
 BUILD_DIR="${BUILD_DIR:-$ROOT/build/deb}"
 ARCH="$(dpkg --print-architecture)"
 
@@ -42,14 +42,14 @@ python3 -m venv "$VENV"
 "$VENV/bin/pip" install -U pip
 "$VENV/bin/pip" install "$ROOT"
 
-cat > "$STAGING/usr/bin/modbus-web-monitor" <<'EOF_WRAPPER'
+cat > "$STAGING/usr/bin/py-modbus-web-monitor" <<'EOF_WRAPPER'
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="/opt/modbus-web-monitor"
-exec "$ROOT/venv/bin/modbus-web-monitor" "$@"
+ROOT="/opt/py-modbus-web-monitor"
+exec "$ROOT/venv/bin/py-modbus-web-monitor" "$@"
 EOF_WRAPPER
-chmod 0755 "$STAGING/usr/bin/modbus-web-monitor"
+chmod 0755 "$STAGING/usr/bin/py-modbus-web-monitor"
 
 cat > "$STAGING/DEBIAN/control" <<EOF_CONTROL
 Package: $PKG_NAME
@@ -60,7 +60,7 @@ Architecture: $ARCH
 Depends: python3
 Maintainer: ${DEB_MAINTAINER:-Andreu Castillo <cp.andreu97@gmail.com>}
 Description: FastAPI + WebSocket Modbus monitor with a React UI.
- One-command launcher: modbus-web-monitor
+ One-command launcher: py-modbus-web-monitor
 EOF_CONTROL
 
 mkdir -p "$BUILD_DIR"

@@ -30,7 +30,7 @@ jobs:
 
     - name: Run mypy
       run: |
-        python -m mypy src/modbus_web_monitor
+        python -m mypy src/py_modbus_web_monitor
 
     - name: Run integration tests
       run: |

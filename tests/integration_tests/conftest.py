@@ -5,7 +5,7 @@ import time
 
 import pytest
 
-from modbus_web_monitor.utils.sim_server import run_simulated_server
+from py_modbus_web_monitor.utils.sim_server import run_simulated_server
 
 
 def is_port_open(host, port):

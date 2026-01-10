@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from modbus_web_monitor.api import app
+from py_modbus_web_monitor.api import app
 
 
 @pytest.fixture

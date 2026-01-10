@@ -1,6 +1,10 @@
 services:
   web:
-    build: .
+    build:
+      context: .
+      args:
+        VITE_DEFAULT_MODBUS_HOST: sim
+        VITE_DEFAULT_MODBUS_PORT: "1502"
     ports:
       - "8000:8000"
   sim:
