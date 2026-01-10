@@ -24,6 +24,7 @@ dev = [
   "pytest>=7.4",
   "ruff>=0.2",
   "black>=24.3",
+  "isort>=5.13",
   "pre-commit>=3.7",
   "allure-pytest>=2.13",
 ]
@@ -44,6 +45,12 @@ Source = "https://github.com/andcaspe/modbus-web-monitor"
 [project.scripts]
 modbus-web-monitor = "modbus_web_monitor.main:main"
 modbus-sim-server = "modbus_web_monitor.utils.sim_server:main"
+
+[tool.isort]
+profile = "black"
+line_length = 88
+src_paths = ["src"]
+known_first_party = ["modbus_web_monitor"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/modbus_web_monitor"]
