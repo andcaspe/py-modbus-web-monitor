@@ -79,7 +79,7 @@ modbus-sim-server \
   --holding-signal sine \
   --input-signal sine \
   --outlier-enable \
-  --outlier-kind input \
+  --outlier-kind holding \
   --outlier-addresses 0-3 \
   --outlier-probability 0.1 \
   --outlier-mode random \
@@ -197,12 +197,26 @@ For coils, values are coerced from booleans/0/1; multiple values are supported w
   Same payload as `/api/anomaly/zscore`.
 
 ## Data logging (SQLite)
-By default, holding/input readings are logged to a per-run file named like
+By default, holding/input readings are logged to a per monitor session file named like
 `outputs/modbus_readings_YYYY-MM-DD_HH-mm-ss.sqlite` (local time).
 
 Environment overrides:
 - `MODBUS_WEB_MONITOR_LOG_ENABLED=false` to disable logging
 - `MODBUS_WEB_MONITOR_LOG_KINDS=holding,input` (or `all`)
+
+## Notebooks
+`notebooks/modbus_readings_analysis.ipynb` loads the latest SQLite log from
+`outputs/` (or a specific path you set in the notebook), plots the series, and
+adds basic anomaly detection.
+
+Suggested dependencies:
+- `pandas`
+- `matplotlib`
+- `jupyter`
+- Optional: `statsmodels` (`pip install -e ".[ml]"`)
+
+Install via extras:
+- `pip install -e ".[notebooks]"`
 
 ## Packaging
 - Install/editable: `pip install -e .`
