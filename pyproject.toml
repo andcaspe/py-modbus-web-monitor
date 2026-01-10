@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "modbus-web-monitor"
+name = "py-modbus-web-monitor"
 version = "0.1.0"
 description = "FastAPI + WebSocket Modbus monitor with a React UI"
 readme = "README.md"
@@ -11,41 +11,68 @@ license = { text = "MIT" }
 requires-python = ">=3.10"
 authors = [{ name = "Andreu Castillo", email = "cp.andreu97@gmail.com" }]
 dependencies = [
-  "fastapi>=0.110",
-  "uvicorn[standard]>=0.23",
-  "pymodbus>=3.6",
-  "pydantic>=2.6",
-  "starlette>=0.37",
+  "fastapi==0.128.0",
+  "uvicorn[standard]==0.40.0",
+  "pymodbus==3.11.4",
+  "pydantic==2.12.5",
+  "starlette==0.50.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-  "httpx>=0.26",
-  "pytest>=7.4",
-  "ruff>=0.2",
-  "black>=24.3",
-  "allure-pytest>=2.13",
+  "httpx==0.28.1",
+  "ruff==0.14.10",
+  "black==25.12.0",
+  "isort==7.0.0",
+  "mypy==1.19.1",
+  "pre-commit==4.5.1",
+  "pytest==9.0.2",
+  "allure-pytest==2.15.3",
+]
+notebooks = [
+  "jupyter==1.1.1",
+  "matplotlib==3.10.8",
+  "numpy==2.4.0",
+  "pandas==2.3.3",
+]
+ml = [
+  "statsmodels==0.14.6",
 ]
 
 [project.urls]
-Homepage = "https://github.com/andcaspe/modbus-web-monitor"
-Source = "https://github.com/andcaspe/modbus-web-monitor"
+Homepage = "https://github.com/andcaspe/py-modbus-web-monitor"
+Source = "https://github.com/andcaspe/py-modbus-web-monitor"
 
 [project.scripts]
-modbus-web-monitor = "modbus_web_monitor.main:main"
-modbus-sim-server = "modbus_web_monitor.utils.sim_server:main"
+py-modbus-web-monitor = "py_modbus_web_monitor.main:main"
+modbus-sim-server = "py_modbus_web_monitor.utils.sim_server:main"
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src/py_modbus_web_monitor"]
+ignore_missing_imports = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_ignores = true
+no_implicit_optional = true
+
+[tool.isort]
+profile = "black"
+line_length = 88
+src_paths = ["src"]
+known_first_party = ["py_modbus_web_monitor"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/modbus_web_monitor"]
-include = ["src/modbus_web_monitor/web/**"]
+packages = ["src/py_modbus_web_monitor"]
+include = ["src/py_modbus_web_monitor/web/**"]
 
 [tool.hatch.build.targets.sdist]
 include = [
-  "src/modbus_web_monitor/**",
+  "src/py_modbus_web_monitor/**",
   "README.md",
   "LICENSE",
   "pyproject.toml",
 ]
 
 [tool.hatch.build.targets.sdist.force-include]
-"src/modbus_web_monitor/web" = "src/modbus_web_monitor/web"
+"src/py_modbus_web_monitor/web" = "src/py_modbus_web_monitor/web"

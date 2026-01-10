@@ -4,10 +4,15 @@ from __future__ import annotations
 
 import asyncio
 from contextlib import asynccontextmanager
-from typing import Iterable, List, Sequence
+from typing import AsyncIterator, List, Sequence, TypeAlias, cast
 
 from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException
+from pymodbus.pdu.bit_message import ReadCoilsResponse, ReadDiscreteInputsResponse
+from pymodbus.pdu.register_message import (
+    ReadHoldingRegistersResponse,
+    ReadInputRegistersResponse,
+)
 
 from .schemas import ConnectionSettings, ReadTarget, WriteOperation
 
@@ -25,17 +30,28 @@ def _is_connected(client: AsyncModbusTcpClient) -> bool:
     if connected:
         return True
     protocol = getattr(client, "protocol", None)
-    return protocol is not None and not getattr(protocol, "transport", None) is None
+    return protocol is not None and getattr(protocol, "transport", None) is not None
 
 
-def _extract_values(response, expected: int, target_kind: str) -> List[int | bool]:
-    if response.isError():  # type: ignore[attr-defined]
+ModbusReadResponse: TypeAlias = (
+    ReadHoldingRegistersResponse
+    | ReadInputRegistersResponse
+    | ReadCoilsResponse
+    | ReadDiscreteInputsResponse
+)
+
+
+def _extract_values(
+    response: ModbusReadResponse, expected: int, target_kind: str
+) -> List[int | bool]:
+    if response.isError():
         raise ModbusOperationError(str(response))
 
+    data: Sequence[int | bool]
     if hasattr(response, "registers"):
-        data = response.registers  # type: ignore[attr-defined]
+        data = response.registers
     elif hasattr(response, "bits"):
-        data = response.bits  # type: ignore[attr-defined]
+        data = response.bits
     else:  # pragma: no cover - defensive
         raise ModbusOperationError(f"Unexpected response for {target_kind}: {response}")
 
@@ -64,7 +80,9 @@ class ModbusTcpSession:
         # pymodbus async client close() is synchronous; don't await.
         self._client.close()
 
-    async def read(self, target: ReadTarget, unit_id: int | None = None) -> List[int | bool]:
+    async def read(
+        self, target: ReadTarget, unit_id: int | None = None
+    ) -> List[int | bool]:
         """Read a register/coil."""
         device_id = unit_id if unit_id is not None else self.settings.unit_id
         async with self._lock:
@@ -88,9 +106,12 @@ class ModbusTcpSession:
             except ModbusException as exc:
                 raise ModbusOperationError(str(exc)) from exc
 
-        return _extract_values(response, target.count, target.kind)
+        typed_response = cast(ModbusReadResponse, response)
+        return _extract_values(typed_response, target.count, target.kind)
 
-    async def write(self, operation: WriteOperation, unit_id: int | None = None) -> None:
+    async def write(
+        self, operation: WriteOperation, unit_id: int | None = None
+    ) -> None:
         """Write a register or coil value."""
         device_id = unit_id if unit_id is not None else self.settings.unit_id
         value = operation.value
@@ -98,8 +119,9 @@ class ModbusTcpSession:
             try:
                 if operation.kind == "holding":
                     if isinstance(value, list):
+                        int_values = [int(v) for v in value]
                         response = await self._client.write_registers(
-                            operation.address, value, device_id=device_id
+                            operation.address, int_values, device_id=device_id
                         )
                     else:
                         response = await self._client.write_register(
@@ -119,12 +141,12 @@ class ModbusTcpSession:
             except ModbusException as exc:
                 raise ModbusOperationError(str(exc)) from exc
 
-        if response.isError():  # type: ignore[attr-defined]
+        if response.isError():
             raise ModbusOperationError(str(response))
 
 
 @asynccontextmanager
-async def tcp_session(settings: ConnectionSettings) -> Iterable[ModbusTcpSession]:
+async def tcp_session(settings: ConnectionSettings) -> AsyncIterator[ModbusTcpSession]:
     """Context manager that yields a connected ModbusTcpSession."""
 
     session = ModbusTcpSession(settings)

@@ -26,4 +26,4 @@ npm run build
 popd >/dev/null
 
 echo "Starting uvicorn on 127.0.0.1:${PORT}"
-exec uvicorn modbus_web_monitor.api:app --host 127.0.0.1 --port "$PORT"
+exec uvicorn py_modbus_web_monitor.api:app --host 127.0.0.1 --port "$PORT"

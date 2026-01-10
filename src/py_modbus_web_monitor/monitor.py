@@ -9,13 +9,14 @@ from typing import Any, Dict, List
 
 from fastapi import WebSocket
 
+from .data_logger import reset_data_logger
 from .modbus_client import (
     ModbusConnectionError,
     ModbusOperationError,
     ModbusTcpSession,
     tcp_session,
 )
-from .schemas import MonitorCommand, MonitorConfig, ReadTarget, WriteOperation
+from .schemas import MonitorCommand, MonitorConfig, WriteOperation
 
 
 async def _poll_registers(
@@ -23,6 +24,7 @@ async def _poll_registers(
     session: ModbusTcpSession,
     config: MonitorConfig,
     stop_event: asyncio.Event,
+    data_logger,
 ) -> None:
     """Poll configured registers and stream updates."""
     await websocket.send_json(
@@ -47,10 +49,17 @@ async def _poll_registers(
         except ModbusOperationError as exc:
             await websocket.send_json({"type": "error", "message": str(exc)})
         else:
+            timestamp = datetime.now(timezone.utc).isoformat()
+            await data_logger.log_readings(
+                config.connection,
+                payload,
+                source="monitor",
+                timestamp=timestamp,
+            )
             await websocket.send_json(
                 {
                     "type": "update",
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": timestamp,
                     "data": payload,
                 }
             )
@@ -72,7 +81,9 @@ async def _handle_commands(
             data = json.loads(raw)
             command = MonitorCommand.model_validate(data)
         except Exception as exc:  # noqa: BLE001 - keep websocket alive
-            await websocket.send_json({"type": "error", "message": f"Invalid payload: {exc}"})
+            await websocket.send_json(
+                {"type": "error", "message": f"Invalid payload: {exc}"}
+            )
             continue
 
         if command.type == "ping":
@@ -110,10 +121,11 @@ async def _perform_writes(
 async def run_monitor_session(websocket: WebSocket, config: MonitorConfig) -> None:
     """Spin up the Modbus session and coordinate polling + commands."""
     try:
+        data_logger = reset_data_logger()
         async with tcp_session(config.connection) as session:
             stop_event = asyncio.Event()
             poll_task = asyncio.create_task(
-                _poll_registers(websocket, session, config, stop_event)
+                _poll_registers(websocket, session, config, stop_event, data_logger)
             )
             command_task = asyncio.create_task(
                 _handle_commands(websocket, session, stop_event)

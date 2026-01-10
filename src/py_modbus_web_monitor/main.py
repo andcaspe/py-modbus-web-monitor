@@ -9,7 +9,9 @@ import uvicorn
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run the Modbus Web Monitor API server.")
+    parser = argparse.ArgumentParser(
+        description="Run the Modbus Web Monitor API server."
+    )
     parser.add_argument(
         "--host",
         default=os.getenv("MODBUS_WEB_MONITOR_HOST", "127.0.0.1"),
@@ -24,7 +26,7 @@ def main() -> None:
     args = parser.parse_args()
 
     uvicorn.run(
-        "modbus_web_monitor.api:app",
+        "py_modbus_web_monitor.api:app",
         host=args.host,
         port=args.port,
         reload=False,

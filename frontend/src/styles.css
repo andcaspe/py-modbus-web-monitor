@@ -251,6 +251,26 @@ button:disabled {
   color: var(--muted);
 }
 
+.anomaly-chip {
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.anomaly-chip.ok {
+  background: rgba(93, 228, 199, 0.12);
+  color: var(--accent);
+}
+
+.anomaly-chip.alert {
+  background: rgba(248, 113, 113, 0.18);
+  color: var(--danger);
+}
+
+.anomaly-chip.muted {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+}
+
 .targets {
   display: flex;
   flex-direction: column;
@@ -285,6 +305,12 @@ button:disabled {
 .field.inline select {
   height: 30px;
   padding: 7px 9px;
+}
+
+.inline-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .chart-panel {

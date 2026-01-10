@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import AnomalyControls from "./components/AnomalyControls";
 import ChartPanel from "./components/ChartPanel";
 import ConnectionForm from "./components/ConnectionForm";
 import LiveTable from "./components/LiveTable";
 import TargetsForm from "./components/TargetsForm";
 import WritePanel from "./components/WritePanel";
+import useAnomalyDetection from "./hooks/useAnomalyDetection";
 import {
   ConnectionConfig,
   HistoryPoint,
@@ -17,6 +19,19 @@ const defaultApiBase =
   (typeof window !== "undefined" && `${window.location.protocol}//${window.location.hostname}:8000`) ||
   "http://localhost:8000";
 const envApiBase = import.meta.env.VITE_API_BASE as string | undefined;
+const envDefaultHost = import.meta.env.VITE_DEFAULT_MODBUS_HOST as string | undefined;
+const envDefaultPort = import.meta.env.VITE_DEFAULT_MODBUS_PORT as string | undefined;
+
+const parsePort = (value: string | undefined, fallback: number) => {
+  if (!value) {
+    return fallback;
+  }
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const defaultHost = envDefaultHost || "127.0.0.1";
+const defaultPort = parsePort(envDefaultPort, 502);
 
 const toWebsocketUrl = (apiBase: string) => {
   try {
@@ -33,13 +48,12 @@ const toWebsocketUrl = (apiBase: string) => {
 };
 
 const keyFor = (target: { kind: string; address: number }) => `${target.kind}:${target.address}`;
-
 export default function App() {
   const [apiBase, setApiBase] = useState(envApiBase || defaultApiBase);
   const [connection, setConnection] = useState<ConnectionConfig>({
     protocol: "tcp",
-    host: "127.0.0.1",
-    port: 502,
+    host: defaultHost,
+    port: defaultPort,
     unitId: 1,
     interval: 1,
   });
@@ -49,6 +63,12 @@ export default function App() {
   const [status, setStatus] = useState<MonitorStatus>("disconnected");
   const [latest, setLatest] = useState<LiveValue[]>([]);
   const [history, setHistory] = useState<Record<string, HistoryPoint[]>>({});
+  const [anomalyConfig, setAnomalyConfig] = useState({
+    method: "none" as "none" | "zscore" | "stl",
+    window: 60,
+    minSamples: 10,
+    threshold: 3,
+  });
   const [logs, setLogs] = useState<string[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
   const targetsRef = useRef<TargetConfig[]>(targets);
@@ -57,8 +77,10 @@ export default function App() {
 
   const wsUrl = useMemo(() => toWebsocketUrl(apiBase), [apiBase]);
 
-  const pushLog = (entry: string) =>
-    setLogs((prev) => [entry, ...prev].slice(0, 80)); // keep recent entries
+  const pushLog = useCallback(
+    (entry: string) => setLogs((prev) => [entry, ...prev].slice(0, 80)),
+    [],
+  ); // keep recent entries
 
   useEffect(
     () => () => {
@@ -93,6 +115,50 @@ export default function App() {
       connect();
     }, 400);
   }, [targets, status]);
+
+  const { summary: anomalySummary, history: anomalyHistory } = useAnomalyDetection({
+    apiBase,
+    connection,
+    targets,
+    latest,
+    history,
+    method: anomalyConfig.method,
+    window: anomalyConfig.window,
+    minSamples: anomalyConfig.minSamples,
+    threshold: anomalyConfig.threshold,
+    active: status === "connected",
+    onError: pushLog,
+  });
+
+  const handleWindowChange = (value: number) => {
+    setAnomalyConfig((prev) => {
+      const window = Number.isFinite(value) ? Math.max(3, value) : prev.window;
+      const minSamples = Math.min(prev.minSamples, window);
+      return { ...prev, window, minSamples };
+    });
+  };
+
+  const handleMinSamplesChange = (value: number) => {
+    setAnomalyConfig((prev) => {
+      const minSamples = Number.isFinite(value) ? Math.max(3, value) : prev.minSamples;
+      const window = Math.max(prev.window, minSamples);
+      return { ...prev, minSamples, window };
+    });
+  };
+
+  const handleThresholdChange = (value: number) => {
+    setAnomalyConfig((prev) => ({
+      ...prev,
+      threshold: Number.isFinite(value) ? Math.max(0, value) : prev.threshold,
+    }));
+  };
+
+  const handleMethodChange = (value: "none" | "zscore" | "stl") => {
+    setAnomalyConfig((prev) => ({
+      ...prev,
+      method: value,
+    }));
+  };
 
   const handleMessage = (event: MessageEvent) => {
     try {
@@ -247,13 +313,29 @@ export default function App() {
         />
         <div className="stack">
           <TargetsForm targets={targets} onChange={setTargets} />
+          <AnomalyControls
+            method={anomalyConfig.method}
+            window={anomalyConfig.window}
+            minSamples={anomalyConfig.minSamples}
+            threshold={anomalyConfig.threshold}
+            onMethodChange={handleMethodChange}
+            onWindowChange={handleWindowChange}
+            onMinSamplesChange={handleMinSamplesChange}
+            onThresholdChange={handleThresholdChange}
+          />
           <WritePanel disabled={status !== "connected"} onSend={sendWrite} />
         </div>
       </div>
 
       <div className="plots-stack">
-        <LiveTable rows={latest} />
-        <ChartPanel history={history} labels={labelMap} />
+        <LiveTable
+          rows={latest}
+          anomalies={anomalySummary}
+          threshold={anomalyConfig.threshold}
+          minSamples={anomalyConfig.minSamples}
+          enabled={anomalyConfig.method !== "none"}
+        />
+        <ChartPanel history={history} labels={labelMap} anomalies={anomalyHistory} />
       </div>
 
       <div className="panel">
