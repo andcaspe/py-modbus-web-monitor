@@ -19,7 +19,8 @@ logger = logging.getLogger(__name__)
 
 _ALLOWED_KINDS = {"holding", "input", "coil", "discrete"}
 _DEFAULT_KINDS = {"holding", "input"}
-_DEFAULT_DB_NAME = "modbus_readings.sqlite"
+_DEFAULT_DB_NAME = "modbus_readings_{date}.sqlite"
+_DATE_FORMAT = "%Y-%m-%d_%H-%M-%S"
 
 
 def _parse_bool(value: str | None, default: bool) -> bool:
@@ -42,10 +43,9 @@ def _parse_kinds(raw: str | None) -> set[str]:
 
 
 def _resolve_db_path() -> Path:
-    override = os.getenv("MODBUS_WEB_MONITOR_DB")
-    if override:
-        return Path(override).expanduser()
-    return Path.cwd() / "outputs" / _DEFAULT_DB_NAME
+    date_stamp = datetime.now().strftime(_DATE_FORMAT)
+    filename = _DEFAULT_DB_NAME.format(date=date_stamp)
+    return Path.cwd() / "outputs" / filename
 
 
 def utc_now_iso() -> str:

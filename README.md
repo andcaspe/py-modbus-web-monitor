@@ -197,10 +197,10 @@ For coils, values are coerced from booleans/0/1; multiple values are supported w
   Same payload as `/api/anomaly/zscore`.
 
 ## Data logging (SQLite)
-By default, holding/input readings are logged to `outputs/modbus_readings.sqlite`.
+By default, holding/input readings are logged to a per-run file named like
+`outputs/modbus_readings_YYYY-MM-DD_HH-mm-ss.sqlite` (local time).
 
 Environment overrides:
-- `MODBUS_WEB_MONITOR_DB=/path/to/modbus_readings.sqlite`
 - `MODBUS_WEB_MONITOR_LOG_ENABLED=false` to disable logging
 - `MODBUS_WEB_MONITOR_LOG_KINDS=holding,input` (or `all`)
 
