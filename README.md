@@ -162,7 +162,7 @@ On every push to `main` or `master`, GitHub Actions automatically:
 For coils, values are coerced from booleans/0/1; multiple values are supported with lists.
 
 ## REST endpoints
-- `POST /api/modbus/read`  
+- `POST /api/modbus/read`
   ```json
   {
     "connection": {"protocol": "tcp", "host": "127.0.0.1", "port": 502, "unitId": 1},
@@ -171,7 +171,7 @@ For coils, values are coerced from booleans/0/1; multiple values are supported w
   ```
   Returns `{"data": [{"address": 0, "kind": "coil", "label": "...", "values": [true, false, ...]}]}`
 
-- `POST /api/modbus/write`  
+- `POST /api/modbus/write`
   ```json
   {
     "connection": {"protocol": "tcp", "host": "127.0.0.1", "port": 502, "unitId": 1},
@@ -179,8 +179,8 @@ For coils, values are coerced from booleans/0/1; multiple values are supported w
   }
   ```
 
-- `POST /api/anomaly/zscore`  
-  Computes z-scores from logged readings (no live Modbus read).  
+- `POST /api/anomaly/zscore`
+  Computes z-scores from logged readings (no live Modbus read).
   ```json
   {
     "connection": {"protocol": "tcp", "host": "127.0.0.1", "port": 502, "unitId": 1},
@@ -191,9 +191,9 @@ For coils, values are coerced from booleans/0/1; multiple values are supported w
   ```
   Returns the latest value, z-score, and sample counts per target value.
 
-- `POST /api/anomaly/stl`  
-  Uses STL decomposition to compute z-scores from residuals.  
-  Requires `statsmodels` (`pip install -e ".[ml]"`).  
+- `POST /api/anomaly/stl`
+  Uses STL decomposition to compute z-scores from residuals.
+  Requires `statsmodels` (`pip install -e ".[ml]"`).
   Same payload as `/api/anomaly/zscore`.
 
 ## Data logging (SQLite)

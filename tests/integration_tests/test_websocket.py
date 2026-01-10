@@ -25,12 +25,12 @@ def test_websocket_monitor(client, modbus_server):
             ]
         }
         websocket.send_text(json.dumps(config))
-        
+
         # 2. Receive status message
         status = websocket.receive_json()
         assert status["type"] == "status"
         assert "Config set" in status["message"]
-        
+
         # 3. Receive at least one update
         # Sometimes there might be a small delay, let's wait for 'update' type
         update = None
@@ -39,7 +39,7 @@ def test_websocket_monitor(client, modbus_server):
             if msg["type"] == "update":
                 update = msg
                 break
-        
+
         assert update is not None
         assert update["type"] == "update"
         assert "data" in update
@@ -57,14 +57,14 @@ def test_websocket_write_through_monitor(client, modbus_server):
         }
         websocket.send_json(config)
         websocket.receive_json() # skip status
-        
+
         # 2. Send write command
         write_cmd = {
             "type": "write",
             "writes": [{"kind": "holding", "address": 60, "value": 555}]
         }
         websocket.send_json(write_cmd)
-        
+
         # 3. Wait for an update that reflects the write (or just check next update)
         # Note: it might take a cycle to see the new value
         found = False

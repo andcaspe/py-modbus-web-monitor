@@ -17,16 +17,16 @@ def modbus_server():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(('', 0))
         port = s.getsockname()[1]
-    
+
     # We use a mutable container to signal the server to stop
     status = {"running": True}
 
     def run_server():
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        
+
         server_task = loop.create_task(run_simulated_server(host, port, period=0.1))
-        
+
         async def wait_for_stop():
             while status["running"]:
                 await asyncio.sleep(0.1)
@@ -52,6 +52,6 @@ def modbus_server():
         time.sleep(0.1)
 
     yield host, port
-    
+
     status["running"] = False
     thread.join(timeout=2)

@@ -50,20 +50,20 @@ def test_write_registers(client, modbus_server):
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
 
-    # Then read it back to verify (Note: sim server updates values every 0.1s, 
-    # but it writes to specific indices. Holding register 10 might be overwritten 
-    # by the _update_values loop if it covers that range. 
+    # Then read it back to verify (Note: sim server updates values every 0.1s,
+    # but it writes to specific indices. Holding register 10 might be overwritten
+    # by the _update_values loop if it covers that range.
     # _update_values updates holding 0-15. So 10 will be overwritten.
-    # Let's use an address outside 0-15 for stable verification if possible, 
+    # Let's use an address outside 0-15 for stable verification if possible,
     # but the sim server data block is 200 wide.
-    
+
     stable_address = 50
     write_payload_stable = {
         "connection": {"protocol": "tcp", "host": host, "port": port, "unitId": 1},
         "writes": [{"kind": "holding", "address": stable_address, "value": 9999}]
     }
     client.post("/api/modbus/write", json=write_payload_stable)
-    
+
     read_payload = {
         "connection": {"protocol": "tcp", "host": host, "port": port, "unitId": 1},
         "targets": [{"kind": "holding", "address": stable_address, "count": 1}]
