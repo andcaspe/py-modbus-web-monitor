@@ -16,7 +16,7 @@ from .modbus_client import (
     ModbusTcpSession,
     tcp_session,
 )
-from .schemas import MonitorCommand, MonitorConfig, ReadTarget, WriteOperation
+from .schemas import MonitorCommand, MonitorConfig, WriteOperation
 
 
 async def _poll_registers(
@@ -81,7 +81,9 @@ async def _handle_commands(
             data = json.loads(raw)
             command = MonitorCommand.model_validate(data)
         except Exception as exc:  # noqa: BLE001 - keep websocket alive
-            await websocket.send_json({"type": "error", "message": f"Invalid payload: {exc}"})
+            await websocket.send_json(
+                {"type": "error", "message": f"Invalid payload: {exc}"}
+            )
             continue
 
         if command.type == "ping":

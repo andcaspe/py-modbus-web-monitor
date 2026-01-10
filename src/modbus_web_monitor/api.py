@@ -14,11 +14,7 @@ from fastapi.staticfiles import StaticFiles
 
 from . import __version__
 from .data_logger import compute_z_score, get_data_logger, utc_now_iso
-from .modbus_client import (
-    ModbusConnectionError,
-    ModbusOperationError,
-    tcp_session,
-)
+from .modbus_client import ModbusConnectionError, ModbusOperationError, tcp_session
 from .monitor import run_monitor_session
 from .schemas import (
     AnomalyRequest,
@@ -203,7 +199,9 @@ def create_app() -> FastAPI:
                     stl = STL(values, period=period, robust=True)
                     result = stl.fit()
                 except Exception as exc:  # noqa: BLE001 - return partial results
-                    logger.warning("STL failed for %s:%s: %s", target.kind, address, exc)
+                    logger.warning(
+                        "STL failed for %s:%s: %s", target.kind, address, exc
+                    )
                     z_scores.append(None)
                     means.append(None)
                     stdevs.append(None)
@@ -273,7 +271,10 @@ async def websocket_monitor(websocket: WebSocket) -> None:
         command = MonitorCommand.model_validate(data)
         if command.type != "configure":
             await websocket.send_json(
-                {"type": "error", "message": "First message must be a 'configure' command"}
+                {
+                    "type": "error",
+                    "message": "First message must be a 'configure' command",
+                }
             )
             await websocket.close()
             return
@@ -297,7 +298,9 @@ async def websocket_monitor(websocket: WebSocket) -> None:
             }
         )
     except Exception as exc:  # noqa: BLE001 - send details to client
-        await websocket.send_json({"type": "error", "message": f"Invalid configuration: {exc}"})
+        await websocket.send_json(
+            {"type": "error", "message": f"Invalid configuration: {exc}"}
+        )
         await websocket.close()
         return
 

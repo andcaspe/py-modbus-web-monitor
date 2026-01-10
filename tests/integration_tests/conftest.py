@@ -1,9 +1,12 @@
 import asyncio
-import pytest
-from modbus_web_monitor.utils.sim_server import run_simulated_server
+import socket
 import threading
 import time
-import socket
+
+import pytest
+
+from modbus_web_monitor.utils.sim_server import run_simulated_server
+
 
 def is_port_open(host, port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -15,7 +18,7 @@ def modbus_server():
     host = "127.0.0.1"
     # Find a free port
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(('', 0))
+        s.bind(("", 0))
         port = s.getsockname()[1]
 
     # We use a mutable container to signal the server to stop

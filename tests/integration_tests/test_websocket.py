@@ -1,11 +1,15 @@
 import json
+
 import pytest
 from fastapi.testclient import TestClient
+
 from modbus_web_monitor.api import app
+
 
 @pytest.fixture
 def client():
     return TestClient(app)
+
 
 def test_websocket_monitor(client, modbus_server):
     host, port = modbus_server
@@ -13,16 +17,11 @@ def test_websocket_monitor(client, modbus_server):
         # 1. Send configuration
         config = {
             "type": "configure",
-            "connection": {
-                "protocol": "tcp",
-                "host": host,
-                "port": port,
-                "unitId": 1
-            },
+            "connection": {"protocol": "tcp", "host": host, "port": port, "unitId": 1},
             "interval": 0.2,
             "targets": [
                 {"kind": "holding", "address": 0, "count": 1, "label": "Reg 0"}
-            ]
+            ],
         }
         websocket.send_text(json.dumps(config))
 
@@ -46,6 +45,7 @@ def test_websocket_monitor(client, modbus_server):
         assert len(update["data"]) == 1
         assert update["data"][0]["address"] == 0
 
+
 def test_websocket_write_through_monitor(client, modbus_server):
     host, port = modbus_server
     with client.websocket_connect("/ws/monitor") as websocket:
@@ -53,15 +53,15 @@ def test_websocket_write_through_monitor(client, modbus_server):
         config = {
             "type": "configure",
             "connection": {"protocol": "tcp", "host": host, "port": port, "unitId": 1},
-            "targets": [{"kind": "holding", "address": 60, "count": 1}]
+            "targets": [{"kind": "holding", "address": 60, "count": 1}],
         }
         websocket.send_json(config)
-        websocket.receive_json() # skip status
+        websocket.receive_json()  # skip status
 
         # 2. Send write command
         write_cmd = {
             "type": "write",
-            "writes": [{"kind": "holding", "address": 60, "value": 555}]
+            "writes": [{"kind": "holding", "address": 60, "value": 555}],
         }
         websocket.send_json(write_cmd)
 
@@ -78,6 +78,7 @@ def test_websocket_write_through_monitor(client, modbus_server):
             if found:
                 break
         assert found
+
 
 def test_websocket_invalid_first_message(client):
     with client.websocket_connect("/ws/monitor") as websocket:

@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-from dataclasses import dataclass, field, replace
 import math
 import random
 import time
 from contextlib import suppress
+from dataclasses import dataclass, field, replace
 from typing import Iterable
 
 from pymodbus.datastore import (
@@ -324,13 +324,21 @@ async def _update_values(
         tick += 1
         phase += signal_settings.phase_step
 
-        holding = _signal_values(signal_settings.holding_signal, tick, phase, signal_settings)
-        inputs = _signal_values(signal_settings.input_signal, tick, phase, signal_settings)
+        holding = _signal_values(
+            signal_settings.holding_signal, tick, phase, signal_settings
+        )
+        inputs = _signal_values(
+            signal_settings.input_signal, tick, phase, signal_settings
+        )
         coils = [((tick + i) % 2) == 0 for i in range(signal_settings.count)]
         discrete = [not c for c in coils]
 
         now = time.monotonic()
-        if fault_settings.enabled and fault_settings.duration > 0 and fault_settings.every > 0:
+        if (
+            fault_settings.enabled
+            and fault_settings.duration > 0
+            and fault_settings.every > 0
+        ):
             if now >= runtime.next_at:
                 runtime.fault_start = now
                 runtime.active_until = now + fault_settings.duration
@@ -413,7 +421,9 @@ async def run_simulated_server(
     fault_settings = fault_settings or FaultSettings()
     outlier_settings = outlier_settings or OutlierSettings()
     updater = asyncio.create_task(
-        _update_values(context, period, signal_settings, fault_settings, outlier_settings)
+        _update_values(
+            context, period, signal_settings, fault_settings, outlier_settings
+        )
     )
     try:
         await StartAsyncTcpServer(
@@ -428,8 +438,12 @@ async def run_simulated_server(
 
 def parse_args(args: Iterable[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run a simulated Modbus TCP server.")
-    parser.add_argument("--host", default="127.0.0.1", help="Bind host (default: 127.0.0.1)")
-    parser.add_argument("--port", type=int, default=1502, help="Bind port (default: 1502)")
+    parser.add_argument(
+        "--host", default="127.0.0.1", help="Bind host (default: 127.0.0.1)"
+    )
+    parser.add_argument(
+        "--port", type=int, default=1502, help="Bind port (default: 1502)"
+    )
     parser.add_argument(
         "--period",
         type=float,
@@ -589,7 +603,9 @@ def main(argv: Iterable[str] | None = None) -> None:
         )
 
     if hasattr(options, "holding_signal"):
-        signal_settings = replace(signal_settings, holding_signal=options.holding_signal)
+        signal_settings = replace(
+            signal_settings, holding_signal=options.holding_signal
+        )
     if hasattr(options, "input_signal"):
         signal_settings = replace(signal_settings, input_signal=options.input_signal)
     if hasattr(options, "signal_amplitude"):
@@ -658,7 +674,9 @@ def main(argv: Iterable[str] | None = None) -> None:
         )
         outlier_overrides_used = True
     if hasattr(options, "outlier_magnitude"):
-        outlier_settings = replace(outlier_settings, magnitude=options.outlier_magnitude)
+        outlier_settings = replace(
+            outlier_settings, magnitude=options.outlier_magnitude
+        )
         outlier_overrides_used = True
     if hasattr(options, "outlier_enable") or outlier_overrides_used:
         outlier_settings = replace(outlier_settings, enabled=True)

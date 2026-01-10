@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from contextlib import asynccontextmanager
-from typing import Iterable, List, Sequence
+from typing import Iterable, List
 
 from pymodbus.client import AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException
@@ -25,7 +25,7 @@ def _is_connected(client: AsyncModbusTcpClient) -> bool:
     if connected:
         return True
     protocol = getattr(client, "protocol", None)
-    return protocol is not None and not getattr(protocol, "transport", None) is None
+    return protocol is not None and getattr(protocol, "transport", None) is not None
 
 
 def _extract_values(response, expected: int, target_kind: str) -> List[int | bool]:
@@ -64,7 +64,9 @@ class ModbusTcpSession:
         # pymodbus async client close() is synchronous; don't await.
         self._client.close()
 
-    async def read(self, target: ReadTarget, unit_id: int | None = None) -> List[int | bool]:
+    async def read(
+        self, target: ReadTarget, unit_id: int | None = None
+    ) -> List[int | bool]:
         """Read a register/coil."""
         device_id = unit_id if unit_id is not None else self.settings.unit_id
         async with self._lock:
@@ -90,7 +92,9 @@ class ModbusTcpSession:
 
         return _extract_values(response, target.count, target.kind)
 
-    async def write(self, operation: WriteOperation, unit_id: int | None = None) -> None:
+    async def write(
+        self, operation: WriteOperation, unit_id: int | None = None
+    ) -> None:
         """Write a register or coil value."""
         device_id = unit_id if unit_id is not None else self.settings.unit_id
         value = operation.value

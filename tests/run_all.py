@@ -1,6 +1,8 @@
 import sys
-import pytest
 from pathlib import Path
+
+import pytest
+
 
 def main():
     # Ensure the 'src' directory is in the python path
@@ -20,6 +22,7 @@ def main():
         args.extend(sys.argv[1:])
 
     return pytest.main(args)
+
 
 if __name__ == "__main__":
     sys.exit(main())
