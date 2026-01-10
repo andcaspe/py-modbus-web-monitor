@@ -112,7 +112,7 @@ class SignalSettings:
     holding_signal: str = "sine"
     input_signal: str = "ramp"
     amplitude: float = 500.0
-    offset: float = 500.0
+    offset: float = 600.0
     noise: float = 10.0
     phase_step: float = 0.2
     phase_shift: float = 0.3
@@ -133,7 +133,7 @@ class FaultSettings:
 @dataclass(frozen=True)
 class OutlierSettings:
     enabled: bool = False
-    kind: str = "input"
+    kind: str = "holding"
     addresses: list[int] = field(default_factory=lambda: [0])
     mode: str = "random"
     probability: float = 0.05
@@ -458,7 +458,7 @@ def parse_args(args: Iterable[str] | None = None) -> argparse.Namespace:
         "--outlier-kind",
         choices=sorted(_FAULT_KINDS),
         default=argparse.SUPPRESS,
-        help="Target register kind for outliers (default: input)",
+        help="Target register kind for outliers (default: holding)",
     )
     parser.add_argument(
         "--outlier-addresses",
@@ -505,7 +505,7 @@ def parse_args(args: Iterable[str] | None = None) -> argparse.Namespace:
         "--signal-offset",
         type=float,
         default=argparse.SUPPRESS,
-        help="Offset for sine signals (default: 500)",
+        help="Offset for sine signals (default: 600)",
     )
     parser.add_argument(
         "--signal-noise",
