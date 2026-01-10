@@ -10,12 +10,12 @@ FastAPI + WebSocket backend with a React UI for reading and writing Modbus devic
 - Simple write form (single or multiple values) over the same WebSocket
 
 ## Docs
-- Quickstart: `docs/quickstart.md`
-- Simulated Modbus server: `docs/simulated-server.md`
-- Docker: `docs/docker.md`
-- Testing and CI: `docs/testing.md`
-- API reference: `docs/api.md`
-- Data logging: `docs/logging.md`
-- Notebooks: `docs/notebooks.md`
-- Packaging: `docs/packaging.md`
-- Roadmap: `docs/roadmap.md`
+- [Quickstart](docs/quickstart.md)
+- [Simulated Modbus server](docs/simulated-server.md)
+- [Docker](docs/docker.md)
+- [Testing and CI](docs/testing.md)
+- [API reference](docs/api.md)
+- [Data logging](docs/logging.md)
+- [Notebooks](docs/notebooks.md)
+- [Packaging](docs/packaging.md)
+- [Roadmap](docs/roadmap.md)
