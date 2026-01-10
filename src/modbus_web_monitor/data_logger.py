@@ -255,11 +255,21 @@ class SQLiteDataLogger:
 _DATA_LOGGER: SQLiteDataLogger | None = None
 
 
+def _build_data_logger() -> SQLiteDataLogger:
+    enabled = _parse_bool(os.getenv("MODBUS_WEB_MONITOR_LOG_ENABLED"), True)
+    kinds = _parse_kinds(os.getenv("MODBUS_WEB_MONITOR_LOG_KINDS"))
+    db_path = _resolve_db_path()
+    return SQLiteDataLogger(db_path=db_path, kinds=kinds, enabled=enabled)
+
+
 def get_data_logger() -> SQLiteDataLogger:
     global _DATA_LOGGER
     if _DATA_LOGGER is None:
-        enabled = _parse_bool(os.getenv("MODBUS_WEB_MONITOR_LOG_ENABLED"), True)
-        kinds = _parse_kinds(os.getenv("MODBUS_WEB_MONITOR_LOG_KINDS"))
-        db_path = _resolve_db_path()
-        _DATA_LOGGER = SQLiteDataLogger(db_path=db_path, kinds=kinds, enabled=enabled)
+        _DATA_LOGGER = _build_data_logger()
+    return _DATA_LOGGER
+
+
+def reset_data_logger() -> SQLiteDataLogger:
+    global _DATA_LOGGER
+    _DATA_LOGGER = _build_data_logger()
     return _DATA_LOGGER

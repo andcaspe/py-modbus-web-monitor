@@ -9,7 +9,7 @@ from typing import Any, Dict, List
 
 from fastapi import WebSocket
 
-from .data_logger import get_data_logger
+from .data_logger import reset_data_logger
 from .modbus_client import (
     ModbusConnectionError,
     ModbusOperationError,
@@ -24,6 +24,7 @@ async def _poll_registers(
     session: ModbusTcpSession,
     config: MonitorConfig,
     stop_event: asyncio.Event,
+    data_logger,
 ) -> None:
     """Poll configured registers and stream updates."""
     await websocket.send_json(
@@ -32,7 +33,6 @@ async def _poll_registers(
             "message": f"Monitoring {len(config.targets)} target(s) every {config.interval}s",
         }
     )
-    data_logger = get_data_logger()
     while not stop_event.is_set():
         payload: List[Dict[str, Any]] = []
         try:
@@ -119,10 +119,11 @@ async def _perform_writes(
 async def run_monitor_session(websocket: WebSocket, config: MonitorConfig) -> None:
     """Spin up the Modbus session and coordinate polling + commands."""
     try:
+        data_logger = reset_data_logger()
         async with tcp_session(config.connection) as session:
             stop_event = asyncio.Event()
             poll_task = asyncio.create_task(
-                _poll_registers(websocket, session, config, stop_event)
+                _poll_registers(websocket, session, config, stop_event, data_logger)
             )
             command_task = asyncio.create_task(
                 _handle_commands(websocket, session, stop_event)
