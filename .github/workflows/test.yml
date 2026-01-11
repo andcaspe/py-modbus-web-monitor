@@ -106,6 +106,12 @@ jobs:
         allure_results: all-results
         allure_history: allure-history
         keep_reports: 20
+        
+    - name: Fix Allure permissions (Docker writes files as root)
+      if: always()
+      run: |
+        sudo chown -R "$(id -u):$(id -g)" allure-history
+        sudo chmod -R u+rwX,go+rX allure-history
 
     - name: Copy latest report to root
       if: always()
