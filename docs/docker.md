@@ -5,7 +5,7 @@ Build and run the web app:
 ```bash
 docker compose up --build
 ```
-Open `http://localhost:8000/app`.
+Open `http://localhost:8000/`.
 
 ## With simulated Modbus device
 ```bash

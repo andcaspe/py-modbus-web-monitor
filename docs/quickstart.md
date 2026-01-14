@@ -15,13 +15,14 @@ npm install
 npm run dev  # http://localhost:5173 (talks to backend at http://localhost:8000 by default)
 ```
 
-To build the UI and let FastAPI serve it from `/app`:
+To build the UI and let FastAPI serve it from `/`:
 ```bash
 cd frontend
 npm run build
 cd ..
 uvicorn py_modbus_web_monitor.api:app --reload
 ```
+Open `http://localhost:8000/` (the legacy `/app` path still works).
 The backend will serve `frontend/dist` automatically if it exists.
 
 ## One-command setup/run (dev)
