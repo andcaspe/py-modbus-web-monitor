@@ -252,60 +252,62 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    @app.websocket("/ws/monitor")
+    async def websocket_monitor(websocket: WebSocket) -> None:
+        await websocket.accept()
+        try:
+            raw = await websocket.receive_text()
+            data = json.loads(raw)
+            command = MonitorCommand.model_validate(data)
+            if command.type != "configure":
+                await websocket.send_json(
+                    {
+                        "type": "error",
+                        "message": "First message must be a 'configure' command",
+                    }
+                )
+                await websocket.close()
+                return
+            assert command.connection is not None
+            config = MonitorConfig(
+                connection=command.connection,
+                interval=command.interval or 1.0,
+                targets=command.targets or [],
+            )
+            logger.info(
+                "WebSocket configure: host=%s port=%s unit=%s targets=%d interval=%.3f",
+                config.connection.host,
+                config.connection.port,
+                config.connection.unit_id,
+                len(config.targets),
+                config.interval,
+            )
+            await websocket.send_json(
+                {
+                    "type": "status",
+                    "message": f"Config set for {config.connection.host}:{config.connection.port} (unit {config.connection.unit_id})",
+                }
+            )
+        except Exception as exc:  # noqa: BLE001 - send details to client
+            await websocket.send_json(
+                {"type": "error", "message": f"Invalid configuration: {exc}"}
+            )
+            await websocket.close()
+            return
+
+        try:
+            await run_monitor_session(websocket, config)
+        except WebSocketDisconnect:
+            return
+
     dist_dir = _resolve_dist_dir()
     if dist_dir:
-        app.mount("/app", StaticFiles(directory=dist_dir, html=True), name="frontend")
+        app.mount(
+            "/app", StaticFiles(directory=dist_dir, html=True), name="frontend-legacy"
+        )
+        app.mount("/", StaticFiles(directory=dist_dir, html=True), name="frontend")
 
     return app
 
 
 app = create_app()
-
-
-@app.websocket("/ws/monitor")
-async def websocket_monitor(websocket: WebSocket) -> None:
-    await websocket.accept()
-    try:
-        raw = await websocket.receive_text()
-        data = json.loads(raw)
-        command = MonitorCommand.model_validate(data)
-        if command.type != "configure":
-            await websocket.send_json(
-                {
-                    "type": "error",
-                    "message": "First message must be a 'configure' command",
-                }
-            )
-            await websocket.close()
-            return
-        assert command.connection is not None
-        config = MonitorConfig(
-            connection=command.connection,
-            interval=command.interval or 1.0,
-            targets=command.targets or [],
-        )
-        logger.info(
-            "WebSocket configure: host=%s port=%s unit=%s targets=%d interval=%.3f",
-            config.connection.host,
-            config.connection.port,
-            config.connection.unit_id,
-            len(config.targets),
-            config.interval,
-        )
-        await websocket.send_json(
-            {
-                "type": "status",
-                "message": f"Config set for {config.connection.host}:{config.connection.port} (unit {config.connection.unit_id})",
-            }
-        )
-    except Exception as exc:  # noqa: BLE001 - send details to client
-        await websocket.send_json(
-            {"type": "error", "message": f"Invalid configuration: {exc}"}
-        )
-        await websocket.close()
-        return
-
-    try:
-        await run_monitor_session(websocket, config)
-    except WebSocketDisconnect:
-        return
