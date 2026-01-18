@@ -1,3 +1,3 @@
-py-modbus-web-monitor (0.1.0-0) unstable; urgency=medium
+py-modbus-web-monitor (0.1.0) unstable; urgency=medium
   * First release.
  -- Andreu Castillo <cp.andreu97@gmail.com>  Sun, 18 Jan 2026 15:15:12 +0100
