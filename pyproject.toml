@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "py-modbus-web-monitor"
-version = "0.1.0"
+version = "0.1.0.0"
 description = "FastAPI + WebSocket Modbus monitor with a React UI"
 readme = "README.md"
 license = { text = "MIT" }
