@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install build tooling
+        run: python -m pip install --upgrade pip build
+
+      - name: Build frontend and sync assets
+        run: bash scripts/sync_web_assets.sh
+
+      - name: Build distribution
+        run: python -m build
+
+      - name: Publish to GitHub Packages
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.GITHUB_TOKEN }}
+          repository_url: https://pip.pkg.github.com/${{ github.repository_owner }}/
+
+      - name: Install dpkg utilities
+        run: sudo apt-get update && sudo apt-get install -y dpkg-dev
+
+      - name: Build release notes from debian/changelog
+        run: |
+          SOURCE=$(dpkg-parsechangelog -l debian/changelog -S Source)
+          VERSION=$(dpkg-parsechangelog -l debian/changelog -S Version)
+          DIST=$(dpkg-parsechangelog -l debian/changelog -S Distribution)
+          URGENCY=$(dpkg-parsechangelog -l debian/changelog -S Urgency)
+          CHANGES=$(dpkg-parsechangelog -l debian/changelog -S Changes)
+
+          {
+            echo "$SOURCE ($VERSION) $DIST; urgency=$URGENCY"
+            echo
+            printf "%s\n" "$CHANGES"
+          } > release_notes.md
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          body_path: release_notes.md
