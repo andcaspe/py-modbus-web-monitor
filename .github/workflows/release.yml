@@ -41,8 +41,9 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
-          password: ${{ secrets.GITHUB_TOKEN }}
-          repository_url: https://pip.pkg.github.com/${{ github.repository_owner }}/
+          password: ${{ secrets.GH_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+          repository-url: https://pip.pkg.github.com/${{ github.repository_owner }}/
+          attestations: false
 
       - name: Install dpkg utilities
         run: sudo apt-get update && sudo apt-get install -y dpkg-dev
