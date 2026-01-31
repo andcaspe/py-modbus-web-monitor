@@ -45,7 +45,7 @@ jobs:
           VERSION=$(dpkg-parsechangelog -l debian/changelog -S Version)
           DIST=$(dpkg-parsechangelog -l debian/changelog -S Distribution)
           URGENCY=$(dpkg-parsechangelog -l debian/changelog -S Urgency)
-          CHANGES=$(dpkg-parsechangelog -l debian/changelog -S Changes)
+          CHANGES=$(dpkg-parsechangelog -l debian/changelog -S Changes | sed '1,2d')
 
           {
             echo "$SOURCE ($VERSION) $DIST; urgency=$URGENCY"
