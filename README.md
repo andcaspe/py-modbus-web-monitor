@@ -2,6 +2,8 @@
 
 FastAPI + WebSocket backend with a React UI for reading and writing Modbus devices over TCP. The backend ships as an installable Python package so it can be embedded or packaged later (e.g., `.deb`). RTU support can be added on top of the existing abstractions.
 
+![img.png](docs/img.png)
+
 ## Features
 - Async FastAPI server with WebSocket streaming
 - One-shot REST endpoints for read/write
